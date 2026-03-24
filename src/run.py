@@ -23,7 +23,6 @@ def main():
     
     try:
         model = LLMFactory.create_llm(
-            model_type=model_config.get('category', 'OpenAIModel').replace('Model', '').lower(),
             model_name_or_path=model_config.get('model_name_or_path'),
             api_key=model_config.get('api_key', ''),
             base_url=model_config.get('base_url', 'https://api.openai.com/v1')
@@ -35,6 +34,13 @@ def main():
     pipeline = Pipeline(model)
     # Extraction config
     extraction_config = config['extraction']
+    
+    # Override global language config
+    from utils.config_manager import ConfigManager
+    global_config = ConfigManager.get_config()
+    if 'language' in extraction_config:
+        global_config['agent']['language'] = extraction_config['language']
+
     # constuct config
     if 'construct' in config:
         construct_config = config['construct']

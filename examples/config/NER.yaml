@@ -1,5 +1,4 @@
 model:
-  category: OpenAIModel # model category, chosen from OpenAIModel.
   model_name_or_path: deepseek-chat # model name
   api_key: "your_api_key" # your API key for the model with API service.
   base_url: "https://api.deepseek.com" # base URL for the API service.
@@ -10,5 +9,6 @@ extraction:
   constraint: ["algorithm", "conference", "else", "product", "task", "field", "metrics", "organization", "researcher", "program language", "country", "location", "person", "university"] # Specified entity types for the named entity recognition task. Default set to empty.
   use_file: false # whether to use a file for the input text.
   mode: quick # extraction mode, chosen from quick, detailed, customized. Default set to quick. See src/config.yaml for more details.
+  language: auto # extraction language, chosen from auto, zh, en. Default set to auto.
   update_case: false # whether to update the case repository. Default set to false.
   show_trajectory: false # whether to display the extracted intermediate steps

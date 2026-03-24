@@ -1,6 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from utils.config_manager import ConfigManager
+from models.prompt_template import PROMPT_REGISTRY
 
 class TaskStrategy(ABC):
     @abstractmethod
@@ -38,7 +39,7 @@ class EntityList(BaseModel):
         return f"\n**Entity Type Constraint**: The type of entities must be chosen from the following list.\n{constraint}\n"
 
     def get_instruction(self) -> str:
-        return ConfigManager.get_config()['agent']['default_ner']
+        return PROMPT_REGISTRY['default_ner'].format()
 
     def get_output_schema(self) -> str:
         return "EntityList"
@@ -62,7 +63,7 @@ class RelationList(BaseModel):
         return f"\n**Relation Type Constraint**: The type of relations must be chosen from the following list.\n{constraint}\n"
 
     def get_instruction(self) -> str:
-        return ConfigManager.get_config()['agent']['default_re']
+        return PROMPT_REGISTRY['default_re'].format()
 
     def get_output_schema(self) -> str:
         return "RelationList"
@@ -86,7 +87,7 @@ class EventList(BaseModel):
         return f"\n**Event Extraction Constraint**: The event type must be selected from the following dictionary keys, and its event arguments should be chosen from its corresponding dictionary values. \n{constraint}\n"
 
     def get_instruction(self) -> str:
-        return ConfigManager.get_config()['agent']['default_ee']
+        return PROMPT_REGISTRY['default_ee'].format()
 
     def get_output_schema(self) -> str:
         return "EventList"
@@ -133,7 +134,7 @@ class TripleList(BaseModel):
         return f"\n**Triple Extraction Constraint**: The type of entities must be chosen from the following list:\n{constraint_str}\n"
 
     def get_instruction(self) -> str:
-        return ConfigManager.get_config()['agent']['default_triple']
+        return PROMPT_REGISTRY['default_triple'].format()
 
     def get_output_schema(self) -> str:
         return "TripleList"

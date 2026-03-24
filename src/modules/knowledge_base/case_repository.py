@@ -8,7 +8,7 @@ from utils.config_manager import ConfigManager
 from sentence_transformers import SentenceTransformer
 from rapidfuzz import process
 from models.llm_def import BaseEngine
-from models.prompt_template import good_case_analysis_instruction, bad_case_reflection_instruction
+from modules.base_agent import BaseAgent
 import copy
 
 import warnings
@@ -92,30 +92,35 @@ class CaseRepository:
         self.embedded_corpus[task][case_type] = torch.cat([self.embedded_corpus[task][case_type], self.embedder.encode([embed_index], convert_to_tensor=True).to(device)], dim=0)
         print(f"A {case_type} case updated for {task} task.")
 
-class CaseRepositoryHandler:
+class CaseRepositoryHandler(BaseAgent):
     def __init__(self, llm: BaseEngine):
+        super().__init__(llm)
         self.repository = CaseRepository()
-        self.llm = llm
 
     def __get_good_case_analysis(self, instruction="", text="", result="", additional_info=""):
-        prompt = good_case_analysis_instruction.format(
-            instruction=instruction, text=text, result=result, additional_info=additional_info
-        )
         for _ in range(3):
-            response = self.llm.get_chat_response(prompt)
-            response = extract_json_dict(response)
-            if not isinstance(response, dict):
+            response = self.invoke_llm(
+                mode="good_case_analysis",
+                instruction=instruction, 
+                text=text, 
+                result=result, 
+                additional_info=additional_info
+            )
+            if isinstance(response, dict):
                 return response
         return None
 
     def __get_bad_case_reflection(self, instruction="", text="", original_answer="", correct_answer="", additional_info=""):
-        prompt = bad_case_reflection_instruction.format(
-            instruction=instruction, text=text, original_answer=original_answer, correct_answer=correct_answer, additional_info=additional_info
-        )
         for _ in range(3):
-            response = self.llm.get_chat_response(prompt)
-            response = extract_json_dict(response)
-            if not isinstance(response, dict):
+            response = self.invoke_llm(
+                mode="bad_case_reflection",
+                instruction=instruction, 
+                text=text, 
+                original_answer=original_answer, 
+                correct_answer=correct_answer, 
+                additional_info=additional_info
+            )
+            if isinstance(response, dict):
                 return response
         return None
 

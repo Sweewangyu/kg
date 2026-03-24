@@ -52,9 +52,5 @@ class OpenAIModel(BaseEngine):
 
 class LLMFactory:
     @staticmethod
-    def create_llm(model_type: str, model_name_or_path: str, api_key: str = "", base_url: str = "https://api.openai.com/v1") -> BaseEngine:
-        # Currently, all LLMs (ChatGPT, DeepSeek) are handled uniformly via OpenAI-compatible APIs.
-        if model_type.lower() == "openai" or model_type.lower() == "openai_compatible":
-            return OpenAIModel(model_name_or_path, api_key, base_url)
-        else:
-            raise ValueError(f"Unsupported model type: {model_type}. Project uses OpenAI-compatible APIs.")
+    def create_llm(model_name_or_path: str, api_key: str = "", base_url: str = "https://api.openai.com/v1") -> BaseEngine:
+        return OpenAIModel(model_name_or_path, api_key, base_url)

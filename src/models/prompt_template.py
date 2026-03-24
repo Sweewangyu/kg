@@ -13,7 +13,16 @@ class BilingualPromptTemplate:
         return bool(re.search(r'[\u4e00-\u9fff]', str(text)))
 
     def format(self, **kwargs):
-        # Determine language based on instruction or text
+        from utils.config_manager import ConfigManager
+        
+        # Check global language configuration
+        config_lang = ConfigManager.get_config().get('agent', {}).get('language', 'auto')
+        if config_lang == 'zh':
+            return self.cn_prompt.format(**kwargs)
+        elif config_lang == 'en':
+            return self.en_prompt.format(**kwargs)
+
+        # Determine language based on instruction or text if auto
         text_to_check = kwargs.get("instruction", "")
         if not text_to_check:
             text_to_check = kwargs.get("text", "")
@@ -288,3 +297,55 @@ bad_case_reflection_instruction = BilingualPromptTemplate(
     en_template=BAD_CASE_REFLECTION_INSTRUCTION_EN,
     cn_template=BAD_CASE_REFLECTION_INSTRUCTION_CN
 )
+
+# ==================================================================== #
+#                          DEFAULT PROMPTS                             #
+# ==================================================================== #
+
+default_schema = BilingualPromptTemplate(
+    input_variables=[],
+    en_template="The final extraction result should be formatted as a JSON object.",
+    cn_template="最终的提取结果应格式化为 JSON 对象。"
+)
+
+default_ner = BilingualPromptTemplate(
+    input_variables=[],
+    en_template="Extract the Named Entities in the given text.",
+    cn_template="提取给定文本中的命名实体。"
+)
+
+default_re = BilingualPromptTemplate(
+    input_variables=[],
+    en_template="Extract Relationships between Named Entities in the given text.",
+    cn_template="提取给定文本中命名实体之间的关系。"
+)
+
+default_ee = BilingualPromptTemplate(
+    input_variables=[],
+    en_template="Extract the Events in the given text.",
+    cn_template="提取给定文本中的事件。"
+)
+
+default_triple = BilingualPromptTemplate(
+    input_variables=[],
+    en_template="Extract the Triples (subject, relation, object) from the given text, hope that all the relationships for each entity can be extracted.",
+    cn_template="从给定文本中提取三元组（主语，关系，宾语），希望能够提取出每个实体的所有关系。"
+)
+
+PROMPT_REGISTRY = {
+    "text_analysis": text_analysis_instruction,
+    "deduced_schema_json": deduced_schema_json_instruction,
+    "deduced_schema_code": deduced_schema_code_instruction,
+    "extract": extract_instruction,
+    "reflect": reflect_instruction,
+    "summarize": summarize_instruction,
+    "good_case_analysis": good_case_analysis_instruction,
+    "bad_case_reflection": bad_case_reflection_instruction,
+    "default_schema": default_schema,
+    "default_ner": default_ner,
+    "default_re": default_re,
+    "default_ee": default_ee,
+    "default_triple": default_triple
+}
+
+

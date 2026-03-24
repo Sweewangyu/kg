@@ -43,6 +43,7 @@ def load_extraction_config(yaml_path):
             "use_file": extraction_config.get('use_file', False),
             "file_path": extraction_config.get('file_path', ""),
             "mode": extraction_config.get('mode', "quick"),
+            "language": extraction_config.get('language', "auto"),
             "update_case": extraction_config.get('update_case', False),
             "show_trajectory": extraction_config.get('show_trajectory', False)
         }
