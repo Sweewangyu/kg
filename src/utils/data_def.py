@@ -1,6 +1,5 @@
 from typing import Literal
-from models import *
-from .process import *
+from .process import extract_json_dict
 # predefined processing logic for routine extraction tasks
 TaskType = Literal["NER", "RE", "EE", "Base"]
 

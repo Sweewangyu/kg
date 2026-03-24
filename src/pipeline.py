@@ -1,8 +1,33 @@
 from typing import Literal
-from models import *
-from utils import *
-from modules import *
-from construct import *
+import json
+from abc import ABC, abstractmethod
+from models import BaseEngine
+from utils.data_def import DataPoint, TaskType
+from utils.process import extract_json_dict
+from utils.config_manager import ConfigManager
+from modules.schema_agent import SchemaAgent
+from modules.extraction_agent import ExtractionAgent
+from modules.reflection_agent import ReflectionAgent
+from modules.knowledge_base.case_repository import CaseRepositoryHandler
+from modules.task_strategy import TaskStrategyFactory
+from construct.convert import generate_cypher_statements, execute_cypher_statements
+
+
+class PipelineStep(ABC):
+    @abstractmethod
+    def execute(self, data: DataPoint) -> DataPoint:
+        pass
+
+class AgentStep(PipelineStep):
+    def __init__(self, agent, method_name: str):
+        self.agent = agent
+        self.method_name = method_name
+        
+    def execute(self, data: DataPoint) -> DataPoint:
+        method = getattr(self.agent, self.method_name, None)
+        if not method:
+            raise AttributeError(f"Method '{self.method_name}' not found in agent.")
+        return method(data)
 
 
 class Pipeline:
@@ -28,18 +53,13 @@ class Pipeline:
         return sorted_process_method
 
     def __init_data(self, data: DataPoint):
-        if data.task == "NER":
-            data.instruction = config['agent']['default_ner']
-            data.output_schema = "EntityList"
-        elif data.task == "RE":
-            data.instruction = config['agent']['default_re']
-            data.output_schema = "RelationList"
-        elif data.task == "EE":
-            data.instruction = config['agent']['default_ee']
-            data.output_schema = "EventList"
-        elif data.task == "Triple":
-            data.instruction = config['agent']['default_triple']
-            data.output_schema = "TripleList"
+        strategy = TaskStrategyFactory.get_strategy(data.task)
+        instruction = strategy.get_instruction()
+        if instruction:
+            data.instruction = instruction
+        output_schema = strategy.get_output_schema()
+        if output_schema:
+            data.output_schema = output_schema
         return data
 
     # main entry
@@ -68,6 +88,8 @@ class Pipeline:
         # Load Data
         data = DataPoint(task=task, instruction=instruction, text=text, output_schema=output_schema, constraint=constraint, use_file=use_file, file_path=file_path, truth=truth)
         data = self.__init_data(data)
+        
+        config = ConfigManager.get_config()
         if mode in config['agent']['mode'].keys():
             process_method = config['agent']['mode'][mode].copy()
         else:
@@ -79,14 +101,15 @@ class Pipeline:
         print_schema = False #
 
         # Information Extract
+        steps = []
         for agent_name, method_name in sorted_process_method.items():
             agent = getattr(self, agent_name, None)
             if not agent:
                 raise AttributeError(f"{agent_name} does not exist.")
-            method = getattr(agent, method_name, None)
-            if not method:
-                raise AttributeError(f"Method '{method_name}' not found in {agent_name}.")
-            data = method(data)
+            steps.append(AgentStep(agent, method_name))
+
+        for step in steps:
+            data = step.execute(data)
             if not print_schema and data.print_schema: #
                 print("Schema: \n", data.print_schema)
                 print_schema = True

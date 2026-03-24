@@ -15,8 +15,7 @@ import yaml
 import os
 import inspect
 import ast
-with open(os.path.join(os.path.dirname(__file__), "..", "config.yaml")) as file:
-    config = yaml.safe_load(file)
+from .config_manager import ConfigManager
 
 # Load configuration
 def load_extraction_config(yaml_path):
@@ -119,7 +118,8 @@ def chunk_str(text):
 
     for sentence in sentences:
         token_count = len(sentence.split())
-        if current_length + token_count <= config['agent']['chunk_token_limit']:
+        limit = ConfigManager.get_config()['agent']['chunk_token_limit']
+        if current_length + token_count <= limit:
             current_chunk.append(sentence)
             current_length += token_count
         else:

@@ -2,10 +2,13 @@ import json
 import os
 import torch
 import numpy as np
-from utils import *
+from utils.data_def import DataPoint, TaskType
+from utils.process import extract_json_dict, normalize_obj
+from utils.config_manager import ConfigManager
 from sentence_transformers import SentenceTransformer
 from rapidfuzz import process
-from models import *
+from models.llm_def import BaseEngine
+from models.prompt_template import good_case_analysis_instruction, bad_case_reflection_instruction
 import copy
 
 import warnings
@@ -18,7 +21,7 @@ class CaseRepository:
         try:
             self.embedder = SentenceTransformer(docker_model_path)
         except:
-            self.embedder = SentenceTransformer(config['model']['embedding_model'])
+            self.embedder = SentenceTransformer(ConfigManager.get_config()['model']['embedding_model'])
         self.embedder.to(device)
         self.corpus = self.load_corpus()
         self.embedded_corpus = self.embed_corpus()

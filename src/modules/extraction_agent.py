@@ -1,6 +1,10 @@
-from models import *
-from utils import *
+import json
+from models.llm_def import BaseEngine
+from models.prompt_template import extract_instruction, summarize_instruction
+from utils.data_def import DataPoint
+from utils.process import extract_json_dict, good_case_wrapper, current_function_name
 from .knowledge_base.case_repository import CaseRepositoryHandler
+from .task_strategy import TaskStrategyFactory
 
 class InformationExtractor:
     def __init__(self, llm: BaseEngine):
@@ -29,45 +33,9 @@ class ExtractionAgent:
     def __get_constraint(self, data: DataPoint):
         if data.constraint == "":
             return data
-        if data.task == "NER":
-            constraint = json.dumps(data.constraint)
-            if "**Entity Type Constraint**" in constraint:
-                return data
-            data.constraint = f"\n**Entity Type Constraint**: The type of entities must be chosen from the following list.\n{constraint}\n"
-        elif data.task == "RE":
-            constraint = json.dumps(data.constraint)
-            if "**Relation Type Constraint**" in constraint:
-                return data
-            data.constraint = f"\n**Relation Type Constraint**: The type of relations must be chosen from the following list.\n{constraint}\n"
-        elif data.task == "EE":
-            constraint = json.dumps(data.constraint)
-            if "**Event Extraction Constraint**" in constraint:
-                return data
-            data.constraint = f"\n**Event Extraction Constraint**: The event type must be selected from the following dictionary keys, and its event arguments should be chosen from its corresponding dictionary values. \n{constraint}\n"
-        elif data.task == "Triple":
-            constraint = json.dumps(data.constraint)
-            if "**Triple Extraction Constraint**" in constraint:
-                return data
-            if len(data.constraint) == 1: # 1 list means entity
-                data.constraint = f"\n**Triple Extraction Constraint**: Entities type must chosen from following list:\n{constraint}\n"
-            elif len(data.constraint) == 2: # 2 list means entity and relation
-                if data.constraint[0] == []:
-                    data.constraint = f"\n**Triple Extraction Constraint**: Relation type must chosen from following list:\n{data.constraint[1]}\n"
-                elif data.constraint[1] == []:
-                    data.constraint = f"\n**Triple Extraction Constraint**: Entities type must chosen from following list:\n{data.constraint[0]}\n"
-                else:
-                    data.constraint = f"\n**Triple Extraction Constraint**: Entities type must chosen from following list:\n{data.constraint[0]}\nRelation type must chosen from following list:\n{data.constraint[1]}\n"
-            elif len(data.constraint) == 3: # 3 list means entity, relation and object
-                if data.constraint[0] == []:
-                    data.constraint = f"\n**Triple Extraction Constraint**: Relation type must chosen from following list:\n{data.constraint[1]}\nObject Entities must chosen from following list:\n{data.constraint[2]}\n"
-                elif data.constraint[1] == []:
-                    data.constraint = f"\n**Triple Extraction Constraint**: Subject Entities must chosen from following list:\n{data.constraint[0]}\nObject Entities must chosen from following list:\n{data.constraint[2]}\n"
-                elif data.constraint[2] == []:
-                    data.constraint = f"\n**Triple Extraction Constraint**: Subject Entities must chosen from following list:\n{data.constraint[0]}\nRelation type must chosen from following list:\n{data.constraint[1]}\n"
-                else:
-                    data.constraint = f"\n**Triple Extraction Constraint**: Subject Entities must chosen from following list:\n{data.constraint[0]}\nRelation type must chosen from following list:\n{data.constraint[1]}\nObject Entities must chosen from following list:\n{data.constraint[2]}\n"
-            else:
-                data.constraint = f"\n**Triple Extraction Constraint**: The type of entities must be chosen from the following list:\n{constraint}\n"
+            
+        strategy = TaskStrategyFactory.get_strategy(data.task)
+        data.constraint = strategy.format_constraint(data.constraint)
         return data
 
     def extract_information_direct(self, data: DataPoint):

@@ -1,6 +1,12 @@
-from models import *
-from utils import *
+import re
+from models.llm_def import BaseEngine
+from models.prompt_template import text_analysis_instruction, deduced_schema_json_instruction, deduced_schema_code_instruction
+from models.prompt_example import json_schema_examples, code_schema_examples
+from utils.data_def import DataPoint
+from utils.process import extract_json_dict, example_wrapper, current_function_name, chunk_file, chunk_str
+from utils.config_manager import ConfigManager
 from .knowledge_base import schema_repository
+from .task_strategy import TaskStrategyFactory
 from langchain_core.output_parsers import JsonOutputParser
 
 class SchemaAnalyzer:
@@ -78,51 +84,17 @@ class SchemaAgent:
             data.chunk_text_list = chunk_file(data.file_path)
         else:
             data.chunk_text_list = chunk_str(data.text)
-        if data.task == "NER":
-            data.print_schema = """
-class Entity(BaseModel):
-    name : str = Field(description="The specific name of the entity. ")
-    type : str = Field(description="The type or category that the entity belongs to.")
-class EntityList(BaseModel):
-    entity_list : List[Entity] = Field(description="Named entities appearing in the text.")
-            """
-        elif data.task == "RE":
-            data.print_schema = """
-class Relation(BaseModel):
-    head : str = Field(description="The starting entity in the relationship.")
-    tail : str = Field(description="The ending entity in the relationship.")
-    relation : str = Field(description="The predicate that defines the relationship between the two entities.")
-
-class RelationList(BaseModel):
-    relation_list : List[Relation] = Field(description="The collection of relationships between various entities.")
-            """
-        elif data.task == "EE":
-            data.print_schema = """
-class Event(BaseModel):
-    event_type : str = Field(description="The type of the event.")
-    event_trigger : str = Field(description="A specific word or phrase that indicates the occurrence of the event.")
-    event_argument : dict = Field(description="The arguments or participants involved in the event.")
-
-class EventList(BaseModel):
-    event_list : List[Event] = Field(description="The events presented in the text.")
-            """
-        elif data.task == "Triple":
-            data.print_schema = """
-class Triple(BaseModel):
-    head: str = Field(description="The subject or head of the triple.")
-    head_type: str = Field(description="The type of the subject entity.")
-    relation: str = Field(description="The predicate or relation between the entities.")
-    relation_type: str = Field(description="The type of the relation.")
-    tail: str = Field(description="The object or tail of the triple.")
-    tail_type: str = Field(description="The type of the object entity.")
-class TripleList(BaseModel):
-    triple_list: List[Triple] = Field(description="The collection of triples and their types presented in the text.")
-"""
+            
+        strategy = TaskStrategyFactory.get_strategy(data.task)
+        print_schema = strategy.get_print_schema()
+        if print_schema:
+            data.print_schema = print_schema
+            
         return data
 
     def get_default_schema(self, data: DataPoint):
         data = self.__preprocess_text(data)
-        default_schema = config['agent']['default_schema']
+        default_schema = ConfigManager.get_config()['agent']['default_schema']
         data.set_schema(default_schema)
         function_name = current_function_name()
         data.update_trajectory(function_name, default_schema)
@@ -134,7 +106,7 @@ class TripleList(BaseModel):
         schema_class = getattr(self.schema_repo, schema_name, None)
         if schema_class is not None:
             schema = self.module.serialize_schema(schema_class)
-            default_schema = config['agent']['default_schema']
+            default_schema = ConfigManager.get_config()['agent']['default_schema']
             data.set_schema(f"{default_schema}\n{schema}")
             function_name = current_function_name()
             data.update_trajectory(function_name, schema)
@@ -153,7 +125,7 @@ class TripleList(BaseModel):
         code, deduced_schema = self.module.get_deduced_schema_code(data.instruction, target_text, distilled_text)
         data.print_schema = code
         data.set_distilled_text(distilled_text)
-        default_schema = config['agent']['default_schema']
+        default_schema = ConfigManager.get_config()['agent']['default_schema']
         data.set_schema(f"{default_schema}\n{deduced_schema}")
         function_name = current_function_name()
         data.update_trajectory(function_name, deduced_schema)

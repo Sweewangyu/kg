@@ -1,7 +1,7 @@
 import sys
 sys.path.append("./src")
-from models import *
-from dataset_def import *
+from models.llm_def import OpenAIModel
+from dataset_def import REDataset
 
 data_dir = "./data/datasets/NYT11/"
 model_name = sys.argv[1] if len(sys.argv) > 1 else "gpt-4o-mini"

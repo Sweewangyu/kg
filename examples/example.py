@@ -1,7 +1,7 @@
 import sys
 sys.path.append("./src")
-from models import *
-from pipeline import *
+from models.llm_def import OpenAIModel
+from pipeline import Pipeline
 import json
 
 # model configuration

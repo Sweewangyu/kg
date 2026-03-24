@@ -1,8 +1,9 @@
 import os
 import json
 import random
-from utils import *
-from pipeline import *
+from utils.process import dict_list_to_set, calculate_metrics
+from models.llm_def import BaseEngine
+from pipeline import Pipeline
 current_dir = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(current_dir, "../data/datasets")
 OUTPUT_DIR = os.path.join(current_dir, "results")

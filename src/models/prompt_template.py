@@ -1,6 +1,6 @@
 import re
 from langchain_core.prompts import PromptTemplate
-from .prompt_example import *
+from .prompt_example import json_schema_examples, code_schema_examples
 
 class BilingualPromptTemplate:
     def __init__(self, input_variables, en_template, cn_template):
