@@ -13,15 +13,13 @@ import copy
 
 import warnings
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-docker_model_path = "/app/model/all-MiniLM-L6-v2"
 warnings.filterwarnings("ignore", category=FutureWarning, message=r".*clean_up_tokenization_spaces*")
 
 class CaseRepository:
     def __init__(self):
-        try:
-            self.embedder = SentenceTransformer(docker_model_path)
-        except:
-            self.embedder = SentenceTransformer(ConfigManager.get_config()['model']['embedding_model'])
+        config = ConfigManager.get_config()
+        model_path = config['model'].get('embedding_model', 'all-MiniLM-L6-v2')
+        self.embedder = SentenceTransformer(model_path)
         self.embedder.to(device)
         self.corpus = self.load_corpus()
         self.embedded_corpus = self.embed_corpus()
@@ -48,7 +46,9 @@ class CaseRepository:
             embedded_corpus[key] = {"good": encoded_good_index, "bad": encoded_bad_index}
         return embedded_corpus
 
-    def get_similarity_scores(self, task: TaskType, embed_index="", str_index="", case_type="", top_k=2):
+    def get_similarity_scores(self, task: TaskType, embed_index="", str_index="", case_type="", top_k=None):
+        if top_k is None:
+            top_k = ConfigManager.get_config()['model'].get('top_k', 2)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # Embedding similarity match
         encoded_embed_query = self.embedder.encode(embed_index, convert_to_tensor=True).to(device)
@@ -82,7 +82,9 @@ class CaseRepository:
         original_scores, original_indices = torch.topk(original_combined_scores, k=min(top_k, original_combined_scores.size(0)))
         return scores, indices, original_scores, original_indices
 
-    def query_case(self, task: TaskType, embed_index="", str_index="", case_type="", top_k=2) -> list:
+    def query_case(self, task: TaskType, embed_index="", str_index="", case_type="", top_k=None) -> list:
+        if top_k is None:
+            top_k = ConfigManager.get_config()['model'].get('top_k', 2)
         _, indices, _, _ = self.get_similarity_scores(task, embed_index, str_index, case_type, top_k)
         top_matches = [self.corpus[task][case_type][idx]["content"] for idx in indices]
         return top_matches
@@ -154,7 +156,8 @@ class CaseRepositoryHandler(BaseAgent):
         embed_index, str_index = self.__get_index(data, "good")
         _, _, original_scores, _ = self.repository.get_similarity_scores(data.task, embed_index, str_index, "good", 1)
         original_scores = original_scores.tolist()
-        if original_scores[0] >= 0.9:
+        threshold = ConfigManager.get_config()['model'].get('similarity_threshold', 0.9)
+        if original_scores[0] >= threshold:
             print("The similar good case is already in the corpus. Similarity Score: ", original_scores[0])
             return
         good_case_alaysis = self.__get_good_case_analysis(instruction=data.instruction, text=data.distilled_text, result=data.truth, additional_info=data.constraint)
@@ -177,7 +180,8 @@ class CaseRepositoryHandler(BaseAgent):
         embed_index, str_index = self.__get_index(data, "bad")
         _, _, original_scores, _ = self.repository.get_similarity_scores(data.task, embed_index, str_index, "bad", 1)
         original_scores = original_scores.tolist()
-        if original_scores[0] >= 0.9:
+        threshold = ConfigManager.get_config()['model'].get('similarity_threshold', 0.9)
+        if original_scores[0] >= threshold:
             print("The similar bad case is already in the corpus. Similarity Score: ", original_scores[0])
             return
         bad_case_reflection = self.__get_bad_case_reflection(instruction=data.instruction, text=data.distilled_text, original_answer=data.pred, correct_answer=data.truth, additional_info=data.constraint)
