@@ -11,15 +11,11 @@ import re
 import json
 import yaml
 import os
-import yaml
-import os
 import inspect
-import ast
 from .config_manager import ConfigManager
 
 # Load configuration
 def load_extraction_config(yaml_path):
-    # Read YAML content from the file path
     if not os.path.exists(yaml_path):
         print(f"Error: The config file '{yaml_path}' does not exist.")
         return {}
@@ -27,87 +23,41 @@ def load_extraction_config(yaml_path):
     with open(yaml_path, 'r') as file:
         config = yaml.safe_load(file)
 
-    # Extract the 'extraction' configuration dictionary
     model_config = config.get('model', {})
     extraction_config = config.get('extraction', {})
 
-    # Model config
-    model_name_or_path = model_config.get('model_name_or_path', "")
-    model_category = model_config.get('category', "")
-    api_key = model_config.get('api_key', "")
-    base_url = model_config.get('base_url', "")
-
-    # Extraction config
-    task = extraction_config.get('task', "")
-    instruction = extraction_config.get('instruction', "")
-    text = extraction_config.get('text', "")
-    output_schema = extraction_config.get('output_schema', "")
-    constraint = extraction_config.get('constraint', "")
-    truth = extraction_config.get('truth', "")
-    use_file = extraction_config.get('use_file', False)
-    file_path = extraction_config.get('file_path', "")
-    mode = extraction_config.get('mode', "quick")
-    update_case = extraction_config.get('update_case', False)
-    show_trajectory = extraction_config.get('show_trajectory', False)
-
-    # Construct config (optional: for constructing your knowledge graph)
-    if 'construct' in config:
-        construct_config = config.get('construct', {})
-        database = construct_config.get('database', "")
-        url = construct_config.get('url', "")
-        username = construct_config.get('username', "")
-        password = construct_config.get('password', "")
-        # Return a dictionary containing these variables
-        return {
-            "model": {
-                "model_name_or_path": model_name_or_path,
-                "category": model_category,
-                "api_key": api_key,
-                "base_url": base_url
-            },
-            "extraction": {
-                "task": task,
-                "instruction": instruction,
-                "text": text,
-                "output_schema": output_schema,
-                "constraint": constraint,
-                "truth": truth,
-                "use_file": use_file,
-                "file_path": file_path,
-                "mode": mode,
-                "update_case": update_case,
-                "show_trajectory": show_trajectory
-            },
-            "construct": {
-                "database": database,
-                "url": url,
-                "username": username,
-                "password": password
-            }
-        }
-
-    # Return a dictionary containing these variables
-    return {
+    result = {
         "model": {
-            "model_name_or_path": model_name_or_path,
-            "category": model_category,
-            "api_key": api_key,
-            "base_url": base_url
+            "model_name_or_path": model_config.get('model_name_or_path', ""),
+            "category": model_config.get('category', ""),
+            "api_key": model_config.get('api_key', ""),
+            "base_url": model_config.get('base_url', "")
         },
         "extraction": {
-            "task": task,
-            "instruction": instruction,
-            "text": text,
-            "output_schema": output_schema,
-            "constraint": constraint,
-            "truth": truth,
-            "use_file": use_file,
-            "file_path": file_path,
-            "mode": mode,
-            "update_case": update_case,
-            "show_trajectory": show_trajectory
+            "task": extraction_config.get('task', ""),
+            "instruction": extraction_config.get('instruction', ""),
+            "text": extraction_config.get('text', ""),
+            "output_schema": extraction_config.get('output_schema', ""),
+            "constraint": extraction_config.get('constraint', ""),
+            "truth": extraction_config.get('truth', ""),
+            "use_file": extraction_config.get('use_file', False),
+            "file_path": extraction_config.get('file_path', ""),
+            "mode": extraction_config.get('mode', "quick"),
+            "update_case": extraction_config.get('update_case', False),
+            "show_trajectory": extraction_config.get('show_trajectory', False)
         }
     }
+
+    if 'construct' in config:
+        construct_config = config.get('construct', {})
+        result["construct"] = {
+            "database": construct_config.get('database', ""),
+            "url": construct_config.get('url', ""),
+            "username": construct_config.get('username', ""),
+            "password": construct_config.get('password', "")
+        }
+
+    return result
 
 # Split the string text into chunks
 def chunk_str(text):
@@ -197,23 +147,27 @@ def extract_json_dict(text):
     else:
         return text
 
-def good_case_wrapper(example: str):
+def _format_examples(example: str, title: str, suffix: str):
     if example is None or example == "":
         return ""
-    example = f"\nHere are some examples:\n{example}\n(END OF EXAMPLES)\nRefer to the reasoning steps and analysis in the examples to help complete the extraction task below.\n\n"
-    return example
+    return f"\n{title}\n{example}\n(END OF EXAMPLES)\n{suffix}\n\n"
+
+def good_case_wrapper(example: str):
+    return _format_examples(
+        example,
+        "Here are some examples:",
+        "Refer to the reasoning steps and analysis in the examples to help complete the extraction task below."
+    )
 
 def bad_case_wrapper(example: str):
-    if example is None or example == "":
-        return ""
-    example = f"\nHere are some examples of bad cases:\n{example}\n(END OF EXAMPLES)\nRefer to the reflection rules and reflection steps in the examples to help optimize the original result below.\n\n"
-    return example
+    return _format_examples(
+        example,
+        "Here are some examples of bad cases:",
+        "Refer to the reflection rules and reflection steps in the examples to help optimize the original result below."
+    )
 
 def example_wrapper(example: str):
-    if example is None or example == "":
-        return ""
-    example = f"\nHere are some examples:\n{example}\n(END OF EXAMPLES)\n\n"
-    return example
+    return _format_examples(example, "Here are some examples:", "")
 
 def remove_redundant_space(s):
     s = ' '.join(s.split())
@@ -225,7 +179,7 @@ def format_string(s):
     s = s.lower()
     s = s.replace('{','').replace('}','')
     s = re.sub(',+', ',', s)
-    s = re.sub('\.+', '.', s)
+    s = re.sub(r'\.+', '.', s)
     s = re.sub(';+', ';', s)
     s = s.replace('’', "'")
     return s

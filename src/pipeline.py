@@ -1,4 +1,3 @@
-from typing import Literal
 import json
 from abc import ABC, abstractmethod
 from models import BaseEngine
@@ -38,18 +37,15 @@ class Pipeline:
         self.extraction_agent = ExtractionAgent(llm = llm, case_repo = self.case_repo)
         self.reflection_agent = ReflectionAgent(llm = llm, case_repo = self.case_repo)
 
-    def __check_consistancy(self, llm, task, mode, update_case):
-        return mode, update_case
-
-    def __init_method(self, data: DataPoint, process_method2):
+    def __init_method(self, data: DataPoint, process_method):
         default_order = ["schema_agent", "extraction_agent", "reflection_agent"]
-        if "schema_agent" not in process_method2:
-            process_method2["schema_agent"] = "get_default_schema"
+        if "schema_agent" not in process_method:
+            process_method["schema_agent"] = "get_default_schema"
         if data.task != "Base":
-            process_method2["schema_agent"] = "get_retrieved_schema"
-        if "extraction_agent" not in process_method2:
-            process_method2["extraction_agent"] = "extract_information_direct"
-        sorted_process_method = {key: process_method2[key] for key in default_order if key in process_method2}
+            process_method["schema_agent"] = "get_retrieved_schema"
+        if "extraction_agent" not in process_method:
+            process_method["extraction_agent"] = "extract_information_direct"
+        sorted_process_method = {key: process_method[key] for key in default_order if key in process_method}
         return sorted_process_method
 
     def __init_data(self, data: DataPoint):
@@ -62,11 +58,74 @@ class Pipeline:
             data.output_schema = output_schema
         return data
 
+    def __build_data(self, task: TaskType, instruction: str, text: str, output_schema: str, constraint: str, use_file: bool, file_path: str, truth: str):
+        data = DataPoint(
+            task=task,
+            instruction=instruction,
+            text=text,
+            output_schema=output_schema,
+            constraint=constraint,
+            use_file=use_file,
+            file_path=file_path,
+            truth=truth
+        )
+        return self.__init_data(data)
+
+    def __resolve_process_method(self, data: DataPoint, mode):
+        config = ConfigManager.get_config()
+        if mode in config['agent']['mode']:
+            process_method = config['agent']['mode'][mode].copy()
+        else:
+            process_method = mode
+        return self.__init_method(data, process_method)
+
+    def __build_steps(self, sorted_process_method):
+        steps = []
+        for agent_name, method_name in sorted_process_method.items():
+            agent = getattr(self, agent_name, None)
+            if not agent:
+                raise AttributeError(f"{agent_name} does not exist.")
+            steps.append(AgentStep(agent, method_name))
+        return steps
+
+    def __run_steps(self, data: DataPoint, steps):
+        has_printed_schema = False
+        for step in steps:
+            data = step.execute(data)
+            if not has_printed_schema and data.print_schema:
+                print("Schema: \n", data.print_schema)
+                has_printed_schema = True
+        return self.extraction_agent.summarize_answer(data)
+
+    def __show_result(self, data: DataPoint, show_trajectory: bool):
+        if show_trajectory:
+            print("Extraction Trajectory: \n", json.dumps(data.get_result_trajectory(), indent=2))
+        extraction_result = json.dumps(data.pred, indent=2)
+        print("Extraction Result: \n", extraction_result)
+        return extraction_result
+
+    def __construct_kg(self, extraction_result, construct):
+        myurl = construct['url']
+        myusername = construct['username']
+        mypassword = construct['password']
+        print(f"Construct KG in your {construct['database']} now...")
+        cypher_statements = generate_cypher_statements(extraction_result)
+        execute_cypher_statements(uri=myurl, user=myusername, password=mypassword, cypher_statements=cypher_statements)
+
+    def __update_case(self, data: DataPoint):
+        if data.truth == "":
+            truth = input("Please enter the correct answer you prefer, or just press Enter to accept the current answer: ")
+            if truth.strip() == "":
+                data.truth = data.pred
+            else:
+                data.truth = extract_json_dict(truth)
+        self.case_repo.update_case(data)
+
     # main entry
     def get_extract_result(self,
                            task: TaskType,
-                           three_agents = {},
-                           construct = {},
+                           three_agents = None,
+                           construct = None,
                            instruction: str = "",
                            text: str = "",
                            output_schema: str = "",
@@ -79,69 +138,17 @@ class Pipeline:
                            show_trajectory: bool = False,
                            iskg: bool = False,
                            ):
-        # for key, value in locals().items():
-        #     print(f"{key}: {value}")
-
-        # Check Consistancy
-        mode, update_case = self.__check_consistancy(self.llm, task, mode, update_case)
-
-        # Load Data
-        data = DataPoint(task=task, instruction=instruction, text=text, output_schema=output_schema, constraint=constraint, use_file=use_file, file_path=file_path, truth=truth)
-        data = self.__init_data(data)
-        
-        config = ConfigManager.get_config()
-        if mode in config['agent']['mode'].keys():
-            process_method = config['agent']['mode'][mode].copy()
-        else:
-            process_method = mode
-
-        sorted_process_method = self.__init_method(data, process_method)
+        construct = construct or {}
+        data = self.__build_data(task, instruction, text, output_schema, constraint, use_file, file_path, truth)
+        sorted_process_method = self.__resolve_process_method(data, mode)
         print("Process Method: ", sorted_process_method)
-
-        print_schema = False #
-
-        # Information Extract
-        steps = []
-        for agent_name, method_name in sorted_process_method.items():
-            agent = getattr(self, agent_name, None)
-            if not agent:
-                raise AttributeError(f"{agent_name} does not exist.")
-            steps.append(AgentStep(agent, method_name))
-
-        for step in steps:
-            data = step.execute(data)
-            if not print_schema and data.print_schema: #
-                print("Schema: \n", data.print_schema)
-                print_schema = True
-        data = self.extraction_agent.summarize_answer(data)
-
-        # show result
-        if show_trajectory:
-            print("Extraction Trajectory: \n", json.dumps(data.get_result_trajectory(), indent=2))
-        extraction_result = json.dumps(data.pred, indent=2)
-        print("Extraction Result: \n", extraction_result)
-
-        # construct KG
+        steps = self.__build_steps(sorted_process_method)
+        data = self.__run_steps(data, steps)
+        extraction_result = self.__show_result(data, show_trajectory)
         if iskg:
-            myurl = construct['url']
-            myusername = construct['username']
-            mypassword = construct['password']
-            print(f"Construct KG in your {construct['database']} now...")
-            cypher_statements = generate_cypher_statements(extraction_result)
-            execute_cypher_statements(uri=myurl, user=myusername, password=mypassword, cypher_statements=cypher_statements)
-
-        # Case Update
+            self.__construct_kg(extraction_result, construct)
         if update_case:
-            if (data.truth == ""):
-                truth = input("Please enter the correct answer you prefer, or just press Enter to accept the current answer: ")
-                if truth.strip() == "":
-                    data.truth = data.pred
-                else:
-                    data.truth = extract_json_dict(truth)
-            self.case_repo.update_case(data)
-
-        # return result
+            self.__update_case(data)
         result = data.pred
         trajectory = data.get_result_trajectory()
-
         return result, trajectory

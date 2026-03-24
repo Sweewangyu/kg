@@ -1,4 +1,3 @@
-import json
 from models.llm_def import BaseEngine
 from models.prompt_template import extract_instruction, summarize_instruction
 from utils.data_def import DataPoint
@@ -28,7 +27,6 @@ class ExtractionAgent:
         self.llm = llm
         self.module = InformationExtractor(llm = llm)
         self.case_repo = case_repo
-        self.methods = ["extract_information_direct", "extract_information_with_case"]
 
     def __get_constraint(self, data: DataPoint):
         if data.constraint == "":

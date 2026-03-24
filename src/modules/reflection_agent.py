@@ -24,7 +24,6 @@ class ReflectionAgent:
         self.module = ReflectionGenerator(llm = llm)
         self.extractor = ExtractionAgent(llm = llm, case_repo = case_repo)
         self.case_repo = case_repo
-        self.methods = ["reflect_with_case"]
 
     def __select_result(self, result_list):
         dict_objects = [obj for obj in result_list if isinstance(obj, dict)]

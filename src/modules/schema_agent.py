@@ -77,7 +77,6 @@ class SchemaAgent:
         self.llm = llm
         self.module = SchemaAnalyzer(llm = llm)
         self.schema_repo = schema_repository
-        self.methods = ["get_default_schema", "get_retrieved_schema", "get_deduced_schema"]
 
     def __preprocess_text(self, data: DataPoint):
         if data.use_file:
