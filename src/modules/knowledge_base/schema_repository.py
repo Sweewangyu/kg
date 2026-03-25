@@ -2,6 +2,12 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from langchain_core.output_parsers import JsonOutputParser
 
+"""集中存放可直接复用的输出结构定义。
+
+- 上半部分是内置任务的标准 schema
+- 下半部分是可按业务扩展的用户自定义 schema
+"""
+
 # ==================================================================== #
 #                                NER TASK                              #
 # ==================================================================== #
@@ -50,6 +56,7 @@ class TripleList(BaseModel):
 #                          TEXT DESCRIPTION                            #
 # ==================================================================== #
 class TextDescription(BaseModel):
+    """用于让 schema_agent 先判断文本领域与体裁，再辅助推导输出结构。"""
     field: str = Field(description="The field of the given text, such as 'Science', 'Literature', 'Business', 'Medicine', 'Entertainment', etc.")
     genre: str = Field(description="The genre of the given text, such as 'Article', 'Novel', 'Dialog', 'Blog', 'Manual','Expository', 'News Report', 'Research Paper', etc.")
 
@@ -59,6 +66,7 @@ class TextDescription(BaseModel):
 
 # --------------------------- Research Paper ----------------------- #
 class MetaData(BaseModel):
+    """论文类文本中最常见的元信息结构。"""
     title : str = Field(description="The title of the article")
     authors : List[str] = Field(description="The list of the article's authors")
     abstract: str = Field(description="The article's abstract")
@@ -70,7 +78,7 @@ class Baseline(BaseModel):
     performance_metrics : str = Field(description="The performance metrics of the method and comparative analysis")
 
 class ExtractionTarget(BaseModel):
-
+    """示例性的论文抽取目标，供用户按需替换或扩展。"""
     key_contributions: List[str] = Field(description="The key contributions of the article")
     limitation_of_sota : str=Field(description="the summary limitation of the existing work")
     proposed_solution : str = Field(description="the proposed solution in details")
@@ -80,6 +88,7 @@ class ExtractionTarget(BaseModel):
 
 # --------------------------- News ----------------------- #
 class Person(BaseModel):
+    """新闻事件中的人物信息。"""
     name: str = Field(description="The name of the person")
     identity: Optional[str] = Field(description="The occupation, status or characteristics of the person.")
     role: Optional[str] = Field(description="The role or function the person plays in an event.")
@@ -93,6 +102,7 @@ class Event(BaseModel):
     result: Optional[str] = Field(default=None, description="Result or outcome of the event")
 
 class NewsReport(BaseModel):
+    """新闻报道的层次化抽取结构。"""
     title: str = Field(description="The title or headline of the news report")
     summary: str = Field(description="A brief summary of the news report")
     publication_date: Optional[str] = Field(description="The publication date of the report")

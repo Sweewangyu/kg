@@ -13,6 +13,7 @@ import yaml
 import os
 import inspect
 from .config_manager import ConfigManager
+from models.prompt_template import get_prompt
 
 # Load configuration
 def load_extraction_config(yaml_path):
@@ -148,27 +149,14 @@ def extract_json_dict(text):
     else:
         return text
 
-def _format_examples(example: str, title: str, suffix: str):
-    if example is None or example == "":
-        return ""
-    return f"\n{title}\n{example}\n(END OF EXAMPLES)\n{suffix}\n\n"
-
 def good_case_wrapper(example: str):
-    return _format_examples(
-        example,
-        "Here are some examples:",
-        "Refer to the reasoning steps and analysis in the examples to help complete the extraction task below."
-    )
+    return get_prompt("good_case_wrapper", example=example) if example else ""
 
 def bad_case_wrapper(example: str):
-    return _format_examples(
-        example,
-        "Here are some examples of bad cases:",
-        "Refer to the reflection rules and reflection steps in the examples to help optimize the original result below."
-    )
+    return get_prompt("bad_case_wrapper", example=example) if example else ""
 
 def example_wrapper(example: str):
-    return _format_examples(example, "Here are some examples:", "")
+    return get_prompt("example_wrapper", example=example) if example else ""
 
 def remove_redundant_space(s):
     s = ' '.join(s.split())

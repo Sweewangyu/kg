@@ -1,7 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from utils.config_manager import ConfigManager
-from models.prompt_template import PROMPT_REGISTRY
+from models.prompt_template import get_prompt
 
 class TaskStrategy(ABC):
     @abstractmethod
@@ -34,12 +33,12 @@ class EntityList(BaseModel):
 
     def format_constraint(self, raw_constraint) -> str:
         constraint = json.dumps(raw_constraint)
-        if "**Entity Type Constraint**" in constraint:
+        if "**Entity Type Constraint**" in constraint or "**实体类型约束**" in constraint:
             return raw_constraint
-        return f"\n**Entity Type Constraint**: The type of entities must be chosen from the following list.\n{constraint}\n"
+        return get_prompt("constraint_ner", constraint=constraint)
 
     def get_instruction(self) -> str:
-        return PROMPT_REGISTRY['default_ner'].format()
+        return get_prompt("default_ner")
 
     def get_output_schema(self) -> str:
         return "EntityList"
@@ -58,12 +57,12 @@ class RelationList(BaseModel):
 
     def format_constraint(self, raw_constraint) -> str:
         constraint = json.dumps(raw_constraint)
-        if "**Relation Type Constraint**" in constraint:
+        if "**Relation Type Constraint**" in constraint or "**关系类型约束**" in constraint:
             return raw_constraint
-        return f"\n**Relation Type Constraint**: The type of relations must be chosen from the following list.\n{constraint}\n"
+        return get_prompt("constraint_re", constraint=constraint)
 
     def get_instruction(self) -> str:
-        return PROMPT_REGISTRY['default_re'].format()
+        return get_prompt("default_re")
 
     def get_output_schema(self) -> str:
         return "RelationList"
@@ -82,12 +81,12 @@ class EventList(BaseModel):
 
     def format_constraint(self, raw_constraint) -> str:
         constraint = json.dumps(raw_constraint)
-        if "**Event Extraction Constraint**" in constraint:
+        if "**Event Extraction Constraint**" in constraint or "**事件提取约束**" in constraint:
             return raw_constraint
-        return f"\n**Event Extraction Constraint**: The event type must be selected from the following dictionary keys, and its event arguments should be chosen from its corresponding dictionary values. \n{constraint}\n"
+        return get_prompt("constraint_ee", constraint=constraint)
 
     def get_instruction(self) -> str:
-        return PROMPT_REGISTRY['default_ee'].format()
+        return get_prompt("default_ee")
 
     def get_output_schema(self) -> str:
         return "EventList"
@@ -108,33 +107,33 @@ class TripleList(BaseModel):
 
     def format_constraint(self, raw_constraint) -> str:
         constraint_str = json.dumps(raw_constraint)
-        if "**Triple Extraction Constraint**" in constraint_str:
+        if "**Triple Extraction Constraint**" in constraint_str or "**三元组提取约束**" in constraint_str:
             return raw_constraint
         
         if isinstance(raw_constraint, list):
             if len(raw_constraint) == 1:
-                return f"\n**Triple Extraction Constraint**: Entities type must chosen from following list:\n{constraint_str}\n"
+                return get_prompt("constraint_triple_entity", constraint=constraint_str)
             elif len(raw_constraint) == 2:
                 if not raw_constraint[0]:
-                    return f"\n**Triple Extraction Constraint**: Relation type must chosen from following list:\n{raw_constraint[1]}\n"
+                    return get_prompt("constraint_triple_relation", constraint=json.dumps(raw_constraint[1]))
                 elif not raw_constraint[1]:
-                    return f"\n**Triple Extraction Constraint**: Entities type must chosen from following list:\n{raw_constraint[0]}\n"
+                    return get_prompt("constraint_triple_entity", constraint=json.dumps(raw_constraint[0]))
                 else:
-                    return f"\n**Triple Extraction Constraint**: Entities type must chosen from following list:\n{raw_constraint[0]}\nRelation type must chosen from following list:\n{raw_constraint[1]}\n"
+                    return get_prompt("constraint_triple_ent_rel", ent_constraint=json.dumps(raw_constraint[0]), rel_constraint=json.dumps(raw_constraint[1]))
             elif len(raw_constraint) == 3:
                 if not raw_constraint[0]:
-                    return f"\n**Triple Extraction Constraint**: Relation type must chosen from following list:\n{raw_constraint[1]}\nObject Entities must chosen from following list:\n{raw_constraint[2]}\n"
+                    return get_prompt("constraint_triple_rel_obj", rel_constraint=json.dumps(raw_constraint[1]), obj_constraint=json.dumps(raw_constraint[2]))
                 elif not raw_constraint[1]:
-                    return f"\n**Triple Extraction Constraint**: Subject Entities must chosen from following list:\n{raw_constraint[0]}\nObject Entities must chosen from following list:\n{raw_constraint[2]}\n"
+                    return get_prompt("constraint_triple_subj_obj", subj_constraint=json.dumps(raw_constraint[0]), obj_constraint=json.dumps(raw_constraint[2]))
                 elif not raw_constraint[2]:
-                    return f"\n**Triple Extraction Constraint**: Subject Entities must chosen from following list:\n{raw_constraint[0]}\nRelation type must chosen from following list:\n{raw_constraint[1]}\n"
+                    return get_prompt("constraint_triple_subj_rel", subj_constraint=json.dumps(raw_constraint[0]), rel_constraint=json.dumps(raw_constraint[1]))
                 else:
-                    return f"\n**Triple Extraction Constraint**: Subject Entities must chosen from following list:\n{raw_constraint[0]}\nRelation type must chosen from following list:\n{raw_constraint[1]}\nObject Entities must chosen from following list:\n{raw_constraint[2]}\n"
+                    return get_prompt("constraint_triple_all", subj_constraint=json.dumps(raw_constraint[0]), rel_constraint=json.dumps(raw_constraint[1]), obj_constraint=json.dumps(raw_constraint[2]))
         
-        return f"\n**Triple Extraction Constraint**: The type of entities must be chosen from the following list:\n{constraint_str}\n"
+        return get_prompt("constraint_triple_default", constraint=constraint_str)
 
     def get_instruction(self) -> str:
-        return PROMPT_REGISTRY['default_triple'].format()
+        return get_prompt("default_triple")
 
     def get_output_schema(self) -> str:
         return "TripleList"

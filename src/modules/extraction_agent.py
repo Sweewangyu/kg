@@ -1,6 +1,6 @@
 from models.llm_def import BaseEngine
 from utils.data_def import DataPoint
-from utils.process import extract_json_dict, good_case_wrapper, current_function_name
+from utils.process import extract_json_dict, current_function_name
 from .knowledge_base.case_repository import CaseRepositoryHandler
 from .task_strategy import TaskStrategyFactory
 from .base_agent import BaseAgent
@@ -28,7 +28,8 @@ class ExtractionAgent(BaseAgent):
                 text=chunk_text, 
                 schema=data.output_schema, 
                 examples="", 
-                additional_info=data.constraint
+                constraint=data.constraint,
+                task=data.task
             )
             result_list.append(extract_direct_result)
         function_name = current_function_name()
@@ -41,14 +42,15 @@ class ExtractionAgent(BaseAgent):
         result_list = []
         for chunk_text in data.chunk_text_list:
             examples = self.case_repo.query_good_case(data)
-            examples = good_case_wrapper(examples)
+            examples_str = "\n\n".join(examples) if examples else ""
             extract_case_result = self.invoke_llm(
                 mode="extract",
                 instruction=data.instruction, 
                 text=chunk_text, 
                 schema=data.output_schema, 
-                examples=examples, 
-                additional_info=data.constraint
+                examples=examples_str, 
+                constraint=data.constraint,
+                task=data.task
             )
             result_list.append(extract_case_result)
         function_name = current_function_name()
@@ -67,7 +69,8 @@ class ExtractionAgent(BaseAgent):
             instruction=data.instruction, 
             answer_list=data.result_list, 
             schema=data.output_schema, 
-            additional_info=data.constraint
+            constraint=data.constraint,
+            task=data.task
         )
         funtion_name = current_function_name()
         data.set_pred(summarized_result)

@@ -1,5 +1,5 @@
 from models.llm_def import BaseEngine
-from models.prompt_template import PROMPT_REGISTRY
+from models.prompt_template import get_prompt
 from utils.process import extract_json_dict
 
 class BaseAgent:
@@ -7,11 +7,7 @@ class BaseAgent:
         self.llm = llm
 
     def invoke_llm(self, mode: str, extract_json=True, **kwargs):
-        prompt_template = PROMPT_REGISTRY.get(mode)
-        if not prompt_template:
-            raise ValueError(f"Prompt template for mode '{mode}' not found.")
-            
-        prompt = prompt_template.format(**kwargs)
+        prompt = get_prompt(mode, **kwargs)
         response = self.llm.get_chat_response(prompt)
         
         if extract_json:

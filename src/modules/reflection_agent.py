@@ -2,7 +2,7 @@ import json
 from collections import Counter
 from models.llm_def import BaseEngine
 from utils.data_def import DataPoint
-from utils.process import bad_case_wrapper, normalize_obj, current_function_name
+from utils.process import normalize_obj, current_function_name
 from .extraction_agent import ExtractionAgent
 from .knowledge_base.case_repository import CaseRepositoryHandler
 from .base_agent import BaseAgent
@@ -56,11 +56,11 @@ class ReflectionAgent(BaseAgent):
             text = data.chunk_text_list[idx]
             result = data.result_list[idx]
             examples = self.case_repo.query_bad_case(data)
-            examples = bad_case_wrapper(examples)
+            examples_str = "\n\n".join(examples) if examples else ""
             reflected_res = self.invoke_llm(
                 mode="reflect",
                 instruction=data.instruction, 
-                examples=examples, 
+                examples=examples_str, 
                 text=text, 
                 schema=data.output_schema, 
                 result=json.dumps(result)

@@ -9,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 from rapidfuzz import process
 from models.llm_def import BaseEngine
 from modules.base_agent import BaseAgent
+from models.prompt_template import get_prompt
 import copy
 
 import warnings
@@ -16,6 +17,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 warnings.filterwarnings("ignore", category=FutureWarning, message=r".*clean_up_tokenization_spaces*")
 
 class CaseRepository:
+    """负责样例库的加载、检索、相似度计算与持久化。"""
     def __init__(self):
         config = ConfigManager.get_config()
         model_path = config['model'].get('embedding_model', 'all-MiniLM-L6-v2')
@@ -25,11 +27,13 @@ class CaseRepository:
         self.embedded_corpus = self.embed_corpus()
 
     def load_corpus(self):
+        """从本地 JSON 文件读取 good/bad case 语料。"""
         with open(os.path.join(os.path.dirname(__file__), "case_repository.json")) as file:
             corpus = json.load(file)
         return corpus
 
     def update_corpus(self):
+        """将内存中的 case 语料回写到本地文件。"""
         try:
             with open(os.path.join(os.path.dirname(__file__), "case_repository.json"), "w") as file:
                 json.dump(self.corpus, file, indent=2)
@@ -37,6 +41,7 @@ class CaseRepository:
             print(f"Error when updating corpus: {e}")
 
     def embed_corpus(self):
+        """为 good/bad case 的索引文本预先生成向量，供后续检索复用。"""
         embedded_corpus = {}
         for key, content in self.corpus.items():
             good_index = [item['index']['embed_index'] for item in content['good']]
@@ -50,19 +55,19 @@ class CaseRepository:
         if top_k is None:
             top_k = ConfigManager.get_config()['model'].get('top_k', 2)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # Embedding similarity match
+        # 语义相似度：比较文本向量语义接近程度
         encoded_embed_query = self.embedder.encode(embed_index, convert_to_tensor=True).to(device)
         embedding_similarity_matrix = self.embedder.similarity(encoded_embed_query, self.embedded_corpus[task][case_type])
         embedding_similarity_scores = embedding_similarity_matrix[0].to(device)
 
-        # String similarity match
+        # 字符串相似度：比较约束/任务描述的字面接近程度
         str_match_corpus = [item['index']['str_index'] for item in self.corpus[task][case_type]]
         str_similarity_results = process.extract(str_index, str_match_corpus, limit=len(str_match_corpus))
         scores_dict = {match[0]: match[1] for match in str_similarity_results}
         scores_in_order = [scores_dict[candidate] for candidate in str_match_corpus]
         str_similarity_scores = torch.tensor(scores_in_order, dtype=torch.float32).to(device)
 
-        # Normalize scores
+        # 归一化后再融合，避免两个分数尺度差异过大
         embedding_score_range = embedding_similarity_scores.max() - embedding_similarity_scores.min()
         str_score_range = str_similarity_scores.max() - str_similarity_scores.min()
         if embedding_score_range > 0:
@@ -74,7 +79,7 @@ class CaseRepository:
         else:
             str_norm_scores = str_similarity_scores / 100
 
-        # Combine the scores with weights
+        # 当前采用语义匹配和字面匹配各占一半权重
         combined_scores = 0.5 * embed_norm_scores + 0.5 * str_norm_scores
         original_combined_scores = 0.5 * embedding_similarity_scores + 0.5 * str_similarity_scores / 100
 
@@ -95,6 +100,7 @@ class CaseRepository:
         print(f"A {case_type} case updated for {task} task.")
 
 class CaseRepositoryHandler(BaseAgent):
+    """负责把抽取流程中的上下文包装成 case，并通过 LLM 生成分析/反思内容。"""
     def __init__(self, llm: BaseEngine):
         super().__init__(llm)
         self.repository = CaseRepository()
@@ -127,18 +133,18 @@ class CaseRepositoryHandler(BaseAgent):
         return None
 
     def __get_index(self, data: DataPoint, case_type: str):
-        # set embed_index
-        embed_index = f"**Text**: {data.distilled_text}\n{data.chunk_text_list[0]}"
-
-        # set str_index
+        """构造检索索引：embed_index 偏语义，str_index 偏任务约束与结果差异。"""
+        embed_index = get_prompt("case_text", distilled_text=data.distilled_text, chunk_text=data.chunk_text_list[0])
         if data.task == "Base":
-            str_index = f"**Task**: {data.instruction}"
+            if case_type == "bad":
+                str_index = get_prompt("case_index_bad_base", instruction=data.instruction, pred=json.dumps(data.pred))
+            else:
+                str_index = get_prompt("case_index_base", instruction=data.instruction)
         else:
-            str_index = f"{data.constraint}"
-
-        if case_type == "bad":
-            str_index += f"\n\n**Original Result**: {json.dumps(data.pred)}"
-
+            if case_type == "bad":
+                str_index = get_prompt("case_index_bad_constraint", constraint=data.constraint, pred=json.dumps(data.pred))
+            else:
+                str_index = get_prompt("case_index_constraint", constraint=data.constraint)
         return embed_index, str_index
 
     def query_good_case(self, data: DataPoint):
@@ -160,15 +166,16 @@ class CaseRepositoryHandler(BaseAgent):
         if original_scores[0] >= threshold:
             print("The similar good case is already in the corpus. Similarity Score: ", original_scores[0])
             return
+        # 对正确答案做一次简要分析，作为 few-shot 里的“为什么这个答案对”
         good_case_alaysis = self.__get_good_case_analysis(instruction=data.instruction, text=data.distilled_text, result=data.truth, additional_info=data.constraint)
-        wrapped_good_case_analysis = f"**Analysis**: {good_case_alaysis}"
-        wrapped_instruction = f"**Task**: {data.instruction}"
-        wrapped_text = f"**Text**: {data.distilled_text}\n{data.chunk_text_list[0]}"
-        wrapped_answer = f"**Correct Answer**: {json.dumps(data.truth)}"
+        wrapped_good_case_analysis = get_prompt("case_analysis", analysis=good_case_alaysis)
+        wrapped_instruction = get_prompt("case_task", instruction=data.instruction)
+        wrapped_text = get_prompt("case_text", distilled_text=data.distilled_text, chunk_text=data.chunk_text_list[0])
+        wrapped_answer = get_prompt("case_correct_answer", truth=json.dumps(data.truth))
         if data.task == "Base":
-            content = f"{wrapped_instruction}\n\n{wrapped_text}\n\n{wrapped_good_case_analysis}\n\n{wrapped_answer}"
+            content = get_prompt("good_case_content_base", instruction=wrapped_instruction, text=wrapped_text, analysis=wrapped_good_case_analysis, answer=wrapped_answer)
         else:
-            content = f"{wrapped_text}\n\n{data.constraint}\n\n{wrapped_good_case_analysis}\n\n{wrapped_answer}"
+            content = get_prompt("good_case_content_task", text=wrapped_text, constraint=data.constraint, analysis=wrapped_good_case_analysis, answer=wrapped_answer)
         self.repository.update_case(data.task, embed_index, str_index, content, "good")
 
     def update_bad_case(self, data: DataPoint):
@@ -184,16 +191,17 @@ class CaseRepositoryHandler(BaseAgent):
         if original_scores[0] >= threshold:
             print("The similar bad case is already in the corpus. Similarity Score: ", original_scores[0])
             return
+        # 对错误答案和标准答案的差异做总结，作为反思型 few-shot
         bad_case_reflection = self.__get_bad_case_reflection(instruction=data.instruction, text=data.distilled_text, original_answer=data.pred, correct_answer=data.truth, additional_info=data.constraint)
-        wrapped_bad_case_reflection = f"**Reflection**: {bad_case_reflection}"
-        wrapper_original_answer = f"**Original Answer**: {json.dumps(data.pred)}"
-        wrapper_correct_answer = f"**Correct Answer**: {json.dumps(data.truth)}"
-        wrapped_instruction = f"**Task**: {data.instruction}"
-        wrapped_text = f"**Text**: {data.distilled_text}\n{data.chunk_text_list[0]}"
+        wrapped_bad_case_reflection = get_prompt("case_reflection", reflection=bad_case_reflection)
+        wrapper_original_answer = get_prompt("case_original_answer", pred=json.dumps(data.pred))
+        wrapper_correct_answer = get_prompt("case_correct_answer", truth=json.dumps(data.truth))
+        wrapped_instruction = get_prompt("case_task", instruction=data.instruction)
+        wrapped_text = get_prompt("case_text", distilled_text=data.distilled_text, chunk_text=data.chunk_text_list[0])
         if data.task == "Base":
-            content = f"{wrapped_instruction}\n\n{wrapped_text}\n\n{wrapper_original_answer}\n\n{wrapped_bad_case_reflection}\n\n{wrapper_correct_answer}"
+            content = get_prompt("bad_case_content_base", instruction=wrapped_instruction, text=wrapped_text, original_answer=wrapper_original_answer, reflection=wrapped_bad_case_reflection, correct_answer=wrapper_correct_answer)
         else:
-            content =  f"{wrapped_text}\n\n{data.constraint}\n\n{wrapper_original_answer}\n\n{wrapped_bad_case_reflection}\n\n{wrapper_correct_answer}"
+            content = get_prompt("bad_case_content_task", text=wrapped_text, constraint=data.constraint, original_answer=wrapper_original_answer, reflection=wrapped_bad_case_reflection, correct_answer=wrapper_correct_answer)
         self.repository.update_case(data.task, embed_index, str_index, content, "bad")
 
     def update_case(self, data: DataPoint):

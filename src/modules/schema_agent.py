@@ -1,10 +1,9 @@
 import re
 from models.llm_def import BaseEngine
 from models.prompt_example import json_schema_examples, code_schema_examples
-from models.prompt_template import PROMPT_REGISTRY
+from models.prompt_template import get_prompt
 from utils.data_def import DataPoint
-from utils.process import extract_json_dict, example_wrapper, current_function_name, chunk_file, chunk_str
-from utils.config_manager import ConfigManager
+from utils.process import example_wrapper, current_function_name, chunk_file, chunk_str
 from .knowledge_base import schema_repository
 from .task_strategy import TaskStrategyFactory
 from langchain_core.output_parsers import JsonOutputParser
@@ -22,8 +21,7 @@ class SchemaAgent(BaseAgent):
             parser = JsonOutputParser(pydantic_object = schema)
             schema_description = parser.get_format_instructions()
             schema_content = re.findall(r'```(.*?)```', schema_description, re.DOTALL)
-            explanation = "For example, for the schema {\"properties\": {\"foo\": {\"title\": \"Foo\", \"description\": \"a list of strings\", \"type\": \"array\", \"items\": {\"type\": \"string\"}}}}, the object {\"foo\": [\"bar\", \"baz\"]} is a well-formatted instance."
-            schema = f"{schema_content}\n\n{explanation}"
+            schema = get_prompt("schema_serialized", schema_content=schema_content)
         except:
             return schema
         return schema
@@ -34,8 +32,7 @@ class SchemaAgent(BaseAgent):
             genre = text_analysis['genre']
         except:
             return text_analysis
-        prompt = f"This text is from the field of {field} and represents the genre of {genre}."
-        return prompt
+        return get_prompt("text_analysis_summary", field=field, genre=genre)
 
     def __preprocess_text(self, data: DataPoint):
         if data.use_file:
@@ -52,7 +49,7 @@ class SchemaAgent(BaseAgent):
 
     def get_default_schema(self, data: DataPoint):
         data = self.__preprocess_text(data)
-        default_schema = PROMPT_REGISTRY['default_schema'].format()
+        default_schema = get_prompt("default_schema")
         data.set_schema(default_schema)
         function_name = current_function_name()
         data.update_trajectory(function_name, default_schema)
@@ -64,8 +61,7 @@ class SchemaAgent(BaseAgent):
         schema_class = getattr(self.schema_repo, schema_name, None)
         if schema_class is not None:
             schema = self.serialize_schema(schema_class)
-            default_schema = PROMPT_REGISTRY['default_schema'].format()
-            data.set_schema(f"{default_schema}\n{schema}")
+            data.set_schema(get_prompt("schema_with_default", default_schema=get_prompt("default_schema"), schema=schema))
             function_name = current_function_name()
             data.update_trajectory(function_name, schema)
         else:
@@ -87,8 +83,7 @@ class SchemaAgent(BaseAgent):
         analysed_text = self.redefine_text(analysed_text_dict)
         
         if len(data.chunk_text_list) > 1:
-            prefix = "Below is a portion of the text to be extracted. "
-            analysed_text = f"{prefix}\n{target_text}"
+            analysed_text = get_prompt("partial_text", text=target_text)
         distilled_text = analysed_text
 
         # 2. get deduced schema code
@@ -132,7 +127,6 @@ class SchemaAgent(BaseAgent):
 
         data.print_schema = code
         data.set_distilled_text(distilled_text)
-        default_schema = PROMPT_REGISTRY['default_schema'].format()
-        data.set_schema(f"{default_schema}\n{deduced_schema}")
+        data.set_schema(get_prompt("schema_with_default", default_schema=get_prompt("default_schema"), schema=deduced_schema))
         data.update_trajectory(current_function_name(), deduced_schema)
         return data
