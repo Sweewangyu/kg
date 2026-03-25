@@ -1,217 +1,158 @@
-"""
-Data Processing Functions.
-Supports:
-- Segmentation of long text
-- Segmentation of file content
-"""
-from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader, BSHTMLLoader, JSONLoader
-from nltk.tokenize import sent_tokenize
-from collections import Counter
-import re
 import json
-import yaml
 import os
-import inspect
+import re
+
+import yaml
+
 from .config_manager import ConfigManager
-from models.prompt_template import get_prompt
+from .logger import logger
 
-# Load configuration
-def load_extraction_config(yaml_path):
+
+def load_extraction_config(yaml_path: str) -> dict:
+    logger.debug(f"Loading extraction config from {yaml_path}")
     if not os.path.exists(yaml_path):
-        print(f"Error: The config file '{yaml_path}' does not exist.")
-        return {}
+        logger.error(f"Config file '{yaml_path}' does not exist.")
+        raise FileNotFoundError(f"Config file '{yaml_path}' does not exist.")
 
-    with open(yaml_path, 'r') as file:
-        config = yaml.safe_load(file)
+    with open(yaml_path, "r", encoding="utf-8") as file:
+        config = yaml.safe_load(file) or {}
 
-    model_config = config.get('model', {})
-    extraction_config = config.get('extraction', {})
-
-    result = {
+    model_config = config.get("model", {})
+    extraction_config = config.get("extraction", {})
+    return {
         "model": {
-            "model_name_or_path": model_config.get('model_name_or_path', ""),
-            "category": model_config.get('category', ""),
-            "api_key": model_config.get('api_key', ""),
-            "base_url": model_config.get('base_url', "")
+            "model_name_or_path": model_config.get("model_name_or_path", ""),
+            "api_key": model_config.get("api_key", ""),
+            "base_url": model_config.get("base_url", ""),
         },
         "extraction": {
-            "task": extraction_config.get('task', ""),
-            "instruction": extraction_config.get('instruction', ""),
-            "text": extraction_config.get('text', ""),
-            "output_schema": extraction_config.get('output_schema', ""),
-            "constraint": extraction_config.get('constraint', ""),
-            "truth": extraction_config.get('truth', ""),
-            "use_file": extraction_config.get('use_file', False),
-            "file_path": extraction_config.get('file_path', ""),
-            "mode": extraction_config.get('mode', "quick"),
-            "language": extraction_config.get('language', "auto"),
-            "update_case": extraction_config.get('update_case', False),
-            "show_trajectory": extraction_config.get('show_trajectory', False)
-        }
+            "text": extraction_config.get("text", ""),
+            "use_file": extraction_config.get("use_file", False),
+            "file_path": extraction_config.get("file_path", ""),
+            "language": extraction_config.get("language", "auto"),
+            "show_trajectory": extraction_config.get("show_trajectory", False),
+        },
     }
 
-    if 'construct' in config:
-        construct_config = config.get('construct', {})
-        result["construct"] = {
-            "database": construct_config.get('database', ""),
-            "url": construct_config.get('url', ""),
-            "username": construct_config.get('username', ""),
-            "password": construct_config.get('password', "")
-        }
 
-    return result
+def _split_sentences(text: str) -> list[str]:
+    normalized_text = re.sub(r"\r\n?", "\n", text)
+    segments = re.split(r"(?<=[.!?。！？])(?:\s+|\n+)|\n{2,}", normalized_text)
+    sentences = [item.strip() for item in segments if item and item.strip()]
+    return sentences or [normalized_text.strip()]
 
-# Split the string text into chunks
-def chunk_str(text):
-    sentences = sent_tokenize(text)
-    chunks = []
-    current_chunk = []
+
+def _get_chunk_settings() -> tuple[int, int]:
+    agent_config = ConfigManager.get_config().get("agent", {})
+    chunk_char_limit = int(agent_config.get("chunk_char_limit") or agent_config.get("chunk_token_limit") or 1024)
+    chunk_overlap_sentences = int(agent_config.get("chunk_overlap_sentences", 2) or 0)
+    return max(1, chunk_char_limit), max(0, chunk_overlap_sentences)
+
+
+def chunk_str(text: str) -> list[dict[str, str]]:
+    cleaned_text = (text or "").strip()
+    if not cleaned_text:
+        return []
+
+    sentences = _split_sentences(cleaned_text)
+    if not sentences:
+        return [{"text": cleaned_text, "context_text": cleaned_text}]
+
+    limit, overlap_sentences = _get_chunk_settings()
+    chunk_ranges: list[tuple[int, int]] = []
+    current_start = 0
     current_length = 0
 
-    for sentence in sentences:
-        token_count = len(sentence.split())
-        limit = ConfigManager.get_config()['agent']['chunk_token_limit']
-        if current_length + token_count <= limit:
-            current_chunk.append(sentence)
-            current_length += token_count
-        else:
-            if current_chunk:
-                chunks.append(' '.join(current_chunk))
-            current_chunk = [sentence]
-            current_length = token_count
-    if current_chunk:
-        chunks.append(' '.join(current_chunk))
-    return chunks
+    for index, sentence in enumerate(sentences):
+        sentence_length = len(sentence)
+        if current_length and current_length + sentence_length > limit:
+            chunk_ranges.append((current_start, index))
+            current_start = index
+            current_length = 0
+        current_length += sentence_length
 
-# Load and split the content of a file
-def chunk_file(file_path):
-    pages = []
+    if current_start < len(sentences):
+        chunk_ranges.append((current_start, len(sentences)))
+
+    chunks: list[dict[str, str]] = []
+    for start, end in chunk_ranges:
+        context_start = max(0, start - overlap_sentences)
+        context_end = min(len(sentences), end + overlap_sentences)
+        chunk_text = " ".join(sentences[start:end]).strip()
+        context_text = " ".join(sentences[context_start:context_end]).strip()
+        if not chunk_text:
+            continue
+        chunks.append(
+            {
+                "text": chunk_text,
+                "context_text": context_text or chunk_text,
+            }
+        )
+    return chunks or [{"text": cleaned_text, "context_text": cleaned_text}]
+
+
+def load_text_from_file(file_path: str) -> str:
+    logger.debug(f"Loading text from file: {file_path}")
+    if not os.path.exists(file_path):
+        logger.error(f"Input file '{file_path}' does not exist.")
+        raise FileNotFoundError(f"Input file '{file_path}' does not exist.")
 
     if file_path.endswith(".pdf"):
-        loader = PyPDFLoader(file_path)
+        logger.info(f"Parsing PDF file: {file_path}")
+        from pypdf import PdfReader
+
+        reader = PdfReader(file_path)
+        content = "".join(page.extract_text() or "" for page in reader.pages).strip()
     elif file_path.endswith(".txt"):
-        loader = TextLoader(file_path)
-    elif file_path.endswith(".docx"):
-        loader = Docx2txtLoader(file_path)
-    elif file_path.endswith(".html"):
-        loader = BSHTMLLoader(file_path)
-    elif file_path.endswith(".json"):
-        loader = JSONLoader(file_path)
+        logger.info(f"Reading TXT file: {file_path}")
+        with open(file_path, "r", encoding="utf-8") as file:
+            content = file.read().strip()
     else:
-        raise ValueError("Unsupported file format")  # Inform that the format is unsupported
+        logger.error(f"Unsupported file format: {file_path}")
+        raise ValueError(f"Unsupported file format: {file_path}")
+    
+    logger.debug(f"Successfully loaded {len(content)} characters from {file_path}")
+    return content
 
-    pages = loader.load_and_split()
-    docs = ""
-    for item in pages:
-        docs += item.page_content
-    pages = chunk_str(docs)
 
-    return pages
+def chunk_file(file_path: str) -> list[dict[str, str]]:
+    content = load_text_from_file(file_path)
+    return chunk_str(content)
 
-def process_single_quotes(text):
-    result = re.sub(r"(?<!\w)'|'(?!\w)", '"', text)
-    return result
+
+def process_single_quotes(text: str) -> str:
+    return re.sub(r"(?<!\w)'|'(?!\w)", '"', text)
+
 
 def remove_empty_values(data):
-    def is_empty(value):
+    def is_empty(value) -> bool:
         return value is None or value == [] or value == "" or value == {}
+
     if isinstance(data, dict):
-        return {
-            k: remove_empty_values(v)
-            for k, v in data.items()
-            if not is_empty(v)
-        }
-    elif isinstance(data, list):
-        return [
-            remove_empty_values(item)
-            for item in data
-            if not is_empty(item)
-        ]
-    else:
-        return data
+        return {key: remove_empty_values(value) for key, value in data.items() if not is_empty(value)}
+    if isinstance(data, list):
+        return [remove_empty_values(item) for item in data if not is_empty(item)]
+    return data
+
 
 def extract_json_dict(text):
     if isinstance(text, dict):
+        return remove_empty_values(text)
+    if not isinstance(text, str):
         return text
-    pattern = r'\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\})*)*\})*)*\}'
+
+    logger.debug("Attempting to extract JSON dict from text...")
+    pattern = r"\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\})*)*\})*)*\}"
     matches = re.findall(pattern, text)
-    if matches:
-        json_string = matches[-1]
-        json_string = process_single_quotes(json_string)
-        try:
-            json_dict = json.loads(json_string)
-            json_dict = remove_empty_values(json_dict)
-            if json_dict is None:
-                return "No valid information found."
-            return json_dict
-        except json.JSONDecodeError:
-            return json_string
-    else:
+    if not matches:
+        logger.warning("No JSON structure found in text.")
         return text
 
-def good_case_wrapper(example: str):
-    return get_prompt("good_case_wrapper", example=example) if example else ""
-
-def bad_case_wrapper(example: str):
-    return get_prompt("bad_case_wrapper", example=example) if example else ""
-
-def example_wrapper(example: str):
-    return get_prompt("example_wrapper", example=example) if example else ""
-
-def remove_redundant_space(s):
-    s = ' '.join(s.split())
-    s = re.sub(r"\s*(,|:|\(|\)|\.|_|;|'|-)\s*", r'\1', s)
-    return s
-
-def format_string(s):
-    s = remove_redundant_space(s)
-    s = s.lower()
-    s = s.replace('{','').replace('}','')
-    s = re.sub(',+', ',', s)
-    s = re.sub(r'\.+', '.', s)
-    s = re.sub(';+', ';', s)
-    s = s.replace('’', "'")
-    return s
-
-def calculate_metrics(y_truth: set, y_pred: set):
-    TP = len(y_truth & y_pred)
-    FN = len(y_truth - y_pred)
-    FP = len(y_pred - y_truth)
-    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
-    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-    return precision, recall, f1_score
-
-def current_function_name():
+    json_string = process_single_quotes(matches[-1])
     try:
-        stack = inspect.stack()
-        if len(stack) > 1:
-            outer_func_name = stack[1].function
-            return outer_func_name
-        else:
-            print("No caller function found")
-            return None
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        pass
-
-def normalize_obj(value):
-    if isinstance(value, dict):
-        return frozenset((k, normalize_obj(v)) for k, v in value.items())
-    elif isinstance(value, (list, set, tuple)):
-        return tuple(Counter(map(normalize_obj, value)).items())
-    elif isinstance(value, str):
-        return format_string(value)
-    return value
-
-def dict_list_to_set(data_list):
-    result_set = set()
-    try:
-        for dictionary in data_list:
-            value_tuple = tuple(format_string(value) for value in dictionary.values())
-            result_set.add(value_tuple)
-        return result_set
-    except Exception as e:
-        print (f"Failed to convert dictionary list to set: {data_list}")
-        return result_set
+        parsed_json = json.loads(json_string)
+        logger.debug("Successfully parsed JSON dict.")
+        return remove_empty_values(parsed_json)
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse JSON: {e}")
+        return json_string

@@ -1,19 +1,5 @@
-model:
-  embedding_model: all-MiniLM-L6-v2 # Can be a HuggingFace model name or a local path (e.g. /app/model/all-MiniLM-L6-v2)
-  similarity_threshold: 0.9 # Threshold for case similarity to avoid redundant updates
-  top_k: 2 # Number of cases to retrieve
-
 agent:
-  language: auto # language mode, chosen from auto, zh, en. Default is auto.
+  language: auto
+  chunk_char_limit: 15
+  chunk_overlap_sentences: 2
   chunk_token_limit: 1024
-  mode:
-    quick:
-      schema_agent: get_deduced_schema
-      extraction_agent: extract_information_direct
-    standard:
-      schema_agent: get_deduced_schema
-      extraction_agent: extract_information_with_case
-      reflection_agent: reflect_with_case
-    customized:
-      schema_agent:  get_retrieved_schema
-      extraction_agent: extract_information_direct

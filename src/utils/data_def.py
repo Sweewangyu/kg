@@ -1,57 +1,71 @@
-from typing import Literal
+from dataclasses import dataclass, field
+from typing import Any
+
 from .process import extract_json_dict
-# predefined processing logic for routine extraction tasks
-TaskType = Literal["NER", "RE", "EE", "Base"]
 
+@dataclass
+class ExtractionRequest:
+    text: str = ""
+    use_file: bool = False
+    file_path: str = ""
+    show_trajectory: bool = False
+
+
+@dataclass
 class DataPoint:
-    def __init__(self,
-                 task: TaskType = "Base",
-                 instruction: str = "",
-                 text: str = "",
-                 output_schema: str = "",
-                 constraint: str = "",
-                 use_file: bool = False,
-                 file_path: str = "",
-                 truth: str = ""):
-        """
-        Initialize a DataPoint instance.
-        """
-        # task information
-        self.task = task
-        self.instruction = instruction
-        self.text = text
-        self.output_schema = output_schema
-        self.constraint = constraint
-        self.use_file = use_file
-        self.file_path = file_path
-        self.truth = extract_json_dict(truth)
-        # temp storage
-        self.print_schema = ""
-        self.distilled_text = ""
-        self.chunk_text_list = []
-        # result feedback
-        self.result_list = []
-        self.result_trajectory = {}
-        self.pred = ""
+    request: ExtractionRequest
+    source_text: str = ""
+    chunks: list[dict[str, str]] = field(default_factory=list)
+    chunk_results: list[dict[str, Any]] = field(default_factory=list)
+    schema: dict[str, list[str]] = field(default_factory=dict)
+    extraction_result: dict[str, Any] = field(default_factory=dict)
+    review_result: dict[str, Any] = field(default_factory=dict)
+    result_trajectory: dict[str, Any] = field(default_factory=dict)
+    pred: Any = field(default_factory=dict)
 
-    def set_constraint(self, constraint):
-        self.constraint = constraint
+    @property
+    def text(self) -> str:
+        return self.request.text
 
-    def set_schema(self, output_schema):
-        self.output_schema = output_schema
+    @property
+    def use_file(self) -> bool:
+        return self.request.use_file
 
-    def set_pred(self, pred):
-        self.pred = pred
+    @property
+    def file_path(self) -> str:
+        return self.request.file_path
 
-    def set_result_list(self, result_list):
-        self.result_list = result_list
+    def set_source_text(self, text: str) -> None:
+        self.source_text = text
 
-    def set_distilled_text(self, distilled_text):
-        self.distilled_text = distilled_text
+    def set_chunks(self, chunks: list[dict[str, str]]) -> None:
+        self.chunks = chunks
 
-    def update_trajectory(self, function, result):
-        if function not in self.result_trajectory:
-            self.result_trajectory.update({function: result})
+    def set_chunk_results(self, results: list[dict[str, Any]]) -> None:
+        self.chunk_results = [extract_json_dict(result) for result in results]
 
-    def get_result_trajectory(self):
-        return {"instruction": self.instruction, "text": self.text, "constraint": self.constraint,  "trajectory": self.result_trajectory, "pred": self.pred}
+    def set_schema(self, schema: dict[str, list[str]]) -> None:
+        self.schema = schema
+
+    def set_extraction_result(self, result: Any) -> None:
+        self.extraction_result = extract_json_dict(result)
+
+    def set_review_result(self, result: Any) -> None:
+        self.review_result = extract_json_dict(result)
+
+    def set_pred(self, pred: Any) -> None:
+        self.pred = extract_json_dict(pred)
+
+    def update_trajectory(self, step_name: str, result: Any) -> None:
+        self.result_trajectory[step_name] = result
+
+    def get_result_trajectory(self) -> dict[str, Any]:
+        return {
+            "text": self.text,
+            "source_text": self.source_text,
+            "chunks": self.chunks,
+            "chunk_results": self.chunk_results,
+            "schema": self.schema,
+            "trajectory": self.result_trajectory,
+            "pred": self.pred,
+        }

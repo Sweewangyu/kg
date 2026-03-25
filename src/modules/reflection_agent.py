@@ -1,72 +1,49 @@
-import json
-from collections import Counter
 from models.llm_def import BaseEngine
+from prompt import build_reflection_prompt, coerce_reflection_result, enforce_schema_compliance
 from utils.data_def import DataPoint
-from utils.process import normalize_obj, current_function_name
-from .extraction_agent import ExtractionAgent
-from .knowledge_base.case_repository import CaseRepositoryHandler
+from utils.logger import logger
+
 from .base_agent import BaseAgent
 
+
 class ReflectionAgent(BaseAgent):
-    def __init__(self, llm: BaseEngine, case_repo: CaseRepositoryHandler):
+    def __init__(self, llm: BaseEngine):
         super().__init__(llm)
-        self.extractor = ExtractionAgent(llm = llm, case_repo = case_repo)
-        self.case_repo = case_repo
 
-    def __select_result(self, result_list):
-        dict_objects = [obj for obj in result_list if isinstance(obj, dict)]
-        if dict_objects:
-            selected_obj = max(dict_objects, key=lambda d: len(json.dumps(d)))
-        else:
-            selected_obj = max(result_list, key=lambda o: len(json.dumps(o)))
-        return selected_obj
+    def reflect(self, data: DataPoint) -> DataPoint:
+        logger.debug("Building reflection prompt...")
+        prompt = build_reflection_prompt(
+            text=data.source_text,
+            schema=data.schema,
+            extraction_result=data.extraction_result,
+        )
+        
+        logger.info("Invoking LLM for reflection...")
+        result = self.invoke_llm(prompt)
+        
+        logger.debug("Coercing reflection result and enforcing schema compliance...")
+        review_result = coerce_reflection_result(result, data.extraction_result)
+        review_result["revised_json"] = enforce_schema_compliance(review_result["revised_json"], data.schema)
 
-    def __self_consistance_check(self, data: DataPoint):
-        extract_func = list(data.result_trajectory.keys())[-1]
-        if hasattr(self.extractor, extract_func):
-            result_trails = []
-            result_trails.append(data.result_list)
-            extract_func = getattr(self.extractor, extract_func)
-            temperature = [0.5, 1]
-            for index in range(2):
-                self.llm.set_hyperparameter(temperature=temperature[index])
-                data = extract_func(data)
-                result_trails.append(data.result_list)
-            self.llm.set_hyperparameter()
-            consistant_result = []
-            reflect_index = []
-            for index, elements in enumerate(zip(*result_trails)):
-                normalized_elements = [normalize_obj(e) for e in elements]
-                element_counts = Counter(normalized_elements)
-                selected_element = next((elements[i] for i, element in enumerate(normalized_elements)
-                                        if element_counts[element] >= 2), None)
-                if selected_element is None:
-                    selected_element = self.__select_result(elements)
-                    reflect_index.append(index)
-                consistant_result.append(selected_element)
-            data.set_result_list(consistant_result)
-            return reflect_index
+        final_result = {
+            "chunks": data.chunk_results,
+            "document": review_result["revised_json"],
+            "review": {
+                "score": review_result["score"],
+                "problems": review_result["problems"],
+                "suggestions": review_result["suggestions"],
+            },
+        }
 
-    def reflect_with_case(self, data: DataPoint):
-        if data.result_list == []:
-            return data
-        reflect_index = self.__self_consistance_check(data)
-        reflected_result_list = data.result_list
-        for idx in reflect_index:
-            text = data.chunk_text_list[idx]
-            result = data.result_list[idx]
-            examples = self.case_repo.query_bad_case(data)
-            examples_str = "\n\n".join(examples) if examples else ""
-            reflected_res = self.invoke_llm(
-                mode="reflect",
-                instruction=data.instruction, 
-                examples=examples_str, 
-                text=text, 
-                schema=data.output_schema, 
-                result=json.dumps(result)
-            )
-            reflected_result_list[idx] = reflected_res
-        data.set_result_list(reflected_result_list)
-        function_name = current_function_name()
-        data.update_trajectory(function_name, data.result_list)
+        data.set_review_result(review_result)
+        data.set_pred(final_result)
+        data.update_trajectory(
+            "reflection_agent",
+            {
+                "review": data.review_result,
+                "final_result": data.pred,
+            },
+        )
+
+        logger.info("Reflection completed.")
         return data
