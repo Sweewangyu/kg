@@ -8,6 +8,44 @@ from .config_manager import ConfigManager
 from .logger import logger
 
 
+def _resolve_config_relative_path(base_path: str, target_path: str) -> str:
+    if os.path.isabs(target_path):
+        return target_path
+    return os.path.join(os.path.dirname(os.path.abspath(base_path)), target_path)
+
+
+def _load_generation_triplets(generation_config: dict, yaml_path: str):
+    triplets_path = generation_config.get("triplets_json_path", "")
+    raw_triplets = generation_config.get("triplets_json", generation_config.get("triplets", []))
+
+    if isinstance(triplets_path, str) and triplets_path.strip():
+        resolved_path = _resolve_config_relative_path(yaml_path, triplets_path.strip())
+        if not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"Triplets JSON file '{resolved_path}' does not exist.")
+        with open(resolved_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+
+    if raw_triplets in ("", None, []):
+        return []
+    if isinstance(raw_triplets, (list, dict)):
+        return raw_triplets
+    if isinstance(raw_triplets, str):
+        stripped_triplets = raw_triplets.strip()
+        resolved_path = _resolve_config_relative_path(yaml_path, stripped_triplets)
+        if os.path.exists(resolved_path) and resolved_path.endswith(".json"):
+            with open(resolved_path, "r", encoding="utf-8") as file:
+                return json.load(file)
+        try:
+            return json.loads(stripped_triplets)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                "generation.triplets_json must be JSON data, a JSON string, or a path to a JSON file."
+            ) from exc
+    raise ValueError(
+        "generation.triplets_json must be JSON data, a JSON string, or a path to a JSON file."
+    )
+
+
 def load_extraction_config(yaml_path: str) -> dict:
     logger.debug(f"Loading extraction config from {yaml_path}")
     if not os.path.exists(yaml_path):
@@ -18,8 +56,24 @@ def load_extraction_config(yaml_path: str) -> dict:
         config = yaml.safe_load(file) or {}
 
     model_config = config.get("model", {})
+    raw_task_config = config.get("task", "extraction")
     extraction_config = config.get("extraction", {})
+    generation_config = config.get("generation", {})
+    agent_config = config.get("agent", {})
+    if isinstance(raw_task_config, dict):
+        task_type = raw_task_config.get("type", "extraction")
+        use_reflection = raw_task_config.get("use_reflection", True)
+    else:
+        task_type = raw_task_config
+        use_reflection = config.get("use_reflection", True)
+
+    raw_triplets = _load_generation_triplets(generation_config, yaml_path)
+
     return {
+        "task": {
+            "type": task_type,
+            "use_reflection": bool(use_reflection),
+        },
         "model": {
             "model_name_or_path": model_config.get("model_name_or_path", ""),
             "api_key": model_config.get("api_key", ""),
@@ -31,6 +85,14 @@ def load_extraction_config(yaml_path: str) -> dict:
             "file_path": extraction_config.get("file_path", ""),
             "language": extraction_config.get("language", "auto"),
             "show_trajectory": extraction_config.get("show_trajectory", False),
+        },
+        "generation": {
+            "triplets_json": raw_triplets,
+            "show_trajectory": generation_config.get("show_trajectory", False),
+        },
+        "agent": {
+            "chunk_char_limit": agent_config.get("chunk_char_limit", 1024),
+            "chunk_overlap_sentences": agent_config.get("chunk_overlap_sentences", 2),
         },
     }
 
@@ -44,7 +106,7 @@ def _split_sentences(text: str) -> list[str]:
 
 def _get_chunk_settings() -> tuple[int, int]:
     agent_config = ConfigManager.get_config().get("agent", {})
-    chunk_char_limit = int(agent_config.get("chunk_char_limit") or agent_config.get("chunk_token_limit") or 1024)
+    chunk_char_limit = int(agent_config.get("chunk_char_limit", 1024) or 1024)
     chunk_overlap_sentences = int(agent_config.get("chunk_overlap_sentences", 2) or 0)
     return max(1, chunk_char_limit), max(0, chunk_overlap_sentences)
 
@@ -148,11 +210,19 @@ def extract_json_dict(text):
         logger.warning("No JSON structure found in text.")
         return text
 
-    json_string = process_single_quotes(matches[-1])
+    json_string = matches[-1]
     try:
         parsed_json = json.loads(json_string)
         logger.debug("Successfully parsed JSON dict.")
         return remove_empty_values(parsed_json)
     except json.JSONDecodeError as e:
+        normalized_json_string = process_single_quotes(json_string)
+        if normalized_json_string != json_string:
+            try:
+                parsed_json = json.loads(normalized_json_string)
+                logger.debug("Successfully parsed JSON dict after normalizing single quotes.")
+                return remove_empty_values(parsed_json)
+            except json.JSONDecodeError:
+                pass
         logger.error(f"Failed to parse JSON: {e}")
         return json_string

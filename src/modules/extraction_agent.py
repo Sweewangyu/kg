@@ -23,7 +23,7 @@ class ExtractionAgent(BaseAgent):
             )
 
             logger.info(f"Invoking LLM for extraction on chunk {index}/{len(chunks)}...")
-            result = self.invoke_llm(prompt)
+            result = self.invoke_llm(prompt, agent_name=f"extraction_agent chunk {index}/{len(chunks)}")
             normalized_result = coerce_extraction_result(result)
             chunk_results.append(
                 {

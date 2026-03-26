@@ -3,71 +3,28 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+EXTRACTION_AGENT_PROMPT = """You are an information extraction engine.
 
-EXTRACTION_AGENT_PROMPT = """You are a precise knowledge graph extraction engine.
-Your task is to jointly extract entities, attributes, and relation triples from the target text in one pass.
-
-You must STRICTLY follow the schema below and must not output any type, relation, or attribute outside the schema.
+Extract entities, entity attributes, and relation triples from the target text using only the allowed schema.
 
 ## Schema
 {schema}
 
-## Task
-From the target text, extract:
-1. entities
-2. attributes of entities
-3. relation triples between entities
-
-## Strict Rules
-1. Each entity must be an object in the form:
-   {{"name": "...", "type": "..."}}
-   - "name" must be normalized, concise, and consistent.
-   - "type" must be one of the allowed node types in the schema.
-
-2. Each triple must be in the form:
-   {{"Head": "subject", "Relation": "relation", "Tail": "object"}}
-   - "Relation" must be one of the allowed relations in the schema.
-   - "Head" and "Tail" must both appear in the entity list.
-   - Do not create triples with values that should instead be attributes.
-
-3. Attributes must be extracted only from the allowed attribute list in the schema.
-   Format:
-   {{
-     "entity_name": ["attribute_type: value", ...]
-   }}
-
-4. Attributes and triples must be complementary and not redundant:
-   - Use attributes for descriptive properties such as age, gender, birthday, nationality, profession, title, color, release date, address, status, number, size, etc.
-   - Use triples only for relations between two entities.
-   - Example: profession should be an attribute, not a triple.
-   - Example: birthday should be an attribute, not a triple.
-
-5. Do not fabricate information.
-   - Only extract information explicitly stated or strongly and unambiguously expressed in the target text.
-   - If uncertain, omit it.
-
-6. Normalize repeated mentions of the same entity.
-   - Merge aliases, abbreviations, pronouns, and shortened mentions into one canonical entity name when unambiguous.
-
-7. Only use the exact relation labels provided in the schema.
-   - Do not invent relation names.
-   - Do not convert attributes into relations.
-   - Do not output type information as triples.
-
-8. Time expressions must NOT be created as standalone entities unless the text clearly treats them as entities under one of the allowed node types.
-   - Normally, time/date/year should be represented using the "time" attribute or "release date" attribute when appropriate.
-
-9. For family relations:
-   - Only use "father of/ mother of / spouse of/ grandparent of" when the text explicitly states the relationship.
-   - Do not infer unstated family relations.
-
-10. Keep the output minimal but complete:
-   - Include all important entities, valid attributes, and supported triples.
-   - Avoid duplicates.
-
-11. You may use the reference context only to resolve aliases, pronouns, or abbreviated mentions.
-   - Do not output any entity, attribute, or triple that is supported only by the reference context.
-   - Every extracted fact must be grounded in the target text span.
+## Rules
+1. Use only entity types, relation labels, and attribute types defined in the schema.
+2. Extract:
+   - entities
+   - attributes of entities
+   - relation triples between entities
+3. Normalize repeated mentions of the same entity into one canonical name when unambiguous.
+4. Use attributes for literal/descriptive values (e.g. age, gender, birthday, nationality, profession, title, color, release date, address, status, number, size, time).
+5. Use triples only for relations between two extracted entities.
+6. Every triple must use:
+   - Head and Tail that both appear in the entity list
+   - a Relation label allowed by the schema
+7. Do not fabricate facts. Extract only information explicitly stated in the target text.
+8. Reference context may be used only to resolve aliases, pronouns, or abbreviated mentions. Do not extract facts supported only by the reference context.
+9. Return minimal but complete results with no duplicates.
 
 ## Target Text
 {text}
@@ -76,116 +33,89 @@ From the target text, extract:
 {context_text}
 
 ## Output Format
-Return JSON only. Do not output markdown. Do not output explanations.
+Return JSON only:
 
 {{
   "entities": [
     {{"name": "...", "type": "..."}}
   ],
   "attributes": {{
-    "entity_name": ["attribute_type: value"]
+    "entity_name": {{
+      "attribute_type": "value"
+    }}
   }},
   "triples": [
     {{"Head": "subject", "Relation": "relation", "Tail": "object"}}
   ]
-}}
-"""
+}}"""
 
 
 REFLECTION_AGENT_PROMPT = """You are a knowledge graph extraction reviewer.
 
-Your job is to review the extraction result produced by the extraction agent, score its quality, identify problems, and provide a corrected version if needed.
-
-You must STRICTLY use the schema below as the only standard.
-
-## Schema
-{schema}
+Review the extraction result against the schema and the source text.
 
 ## Input Text
 {text}
 
-## Extraction Result To Review
+## Extraction Result
 {extraction_result}
 
-## Review Goals
-Check the extraction result carefully from the following aspects:
+## Review Criteria
+Evaluate only these aspects:
+1. schema compliance
+2. faithfulness to the text
+3. completeness under the schema
+4. entity normalization and deduplication
 
-1. Schema Compliance
-   - Are all entity types within the allowed node types?
-   - Are all relations within the allowed relation types?
-   - Are all attributes within the allowed attribute types?
-   - Are there any unsupported labels, fields, or invented categories?
-
-2. Entity Quality
-   - Are important entities missing?
-   - Are there duplicate entities referring to the same real-world entity?
-   - Are entity names normalized consistently and concisely?
-   - Are entity types correct?
-
-3. Triple Quality
-   - Do all triples use valid relation names from the schema?
-   - Do Head and Tail both exist in the entity list?
-   - Are the triples faithful to the text?
-   - Are any triples actually attributes and therefore incorrectly represented?
-   - Are any important supported triples missing?
-
-4. Attribute Quality
-   - Are attributes attached to the correct entity?
-   - Are attribute names valid according to the schema?
-   - Are attribute values faithful to the text?
-   - Are any attributes missing?
-   - Are any attributes redundant with triples?
-
-5. Faithfulness
-   - Does the result contain hallucinated information not supported by the text?
-   - Is there any over-inference beyond the text?
-
-6. Completeness
-   - Considering only the provided schema, does the result capture the main extractable information from the text?
-   - Are there obvious omissions of major entities, attributes, or triples?
+## Rules
+1. Use the schema as the only standard.
+2. Do not use any information not supported by the input text.
+3. Focus on major errors and important omissions.
+4. Be concise and objective.
 
 ## Scoring
-Give an overall quality score from 0 to 100.
+Give scores from 0 to 100 for:
+- schema_compliance
+- faithfulness
+- completeness
+- normalization
 
-Scoring guideline:
-- 90-100: Highly accurate, schema-compliant, complete, almost no issues
-- 75-89: Good overall, minor issues or a few omissions
-- 50-74: Noticeable problems in correctness, compliance, or completeness
-- 0-49: Serious problems, many errors, unsupported schema usage, or major omissions
+Then give an overall_score.
+
+## Output
+Return JSON only:
+
+{{
+  "schema_compliance": 0,
+  "faithfulness": 0,
+  "completeness": 0,
+  "normalization": 0,
+  "overall_score": 0,
+  "major_problems": [
+    "..."
+  ],
+  "minor_problems": [
+    "..."
+  ]
+}}"""
+
+
+REVERSE_GENERATION_AGENT_PROMPT = """You are a precise reverse knowledge graph verbalization engine.
+
+Your job is to express the full information from the given triplets in high-quality, fluent, and natural text.
+
+## Goals
+1. Cover all facts in the triplets.
+2. Do not add any information that is not present in the triplets.
+3. Combine related facts naturally when possible.
+4. Keep the text concise, faithful, and readable.
+5. Resolve repeated subjects or objects into smooth wording only when the meaning stays exactly the same.
+
+## Triplets To Express
+{triplets}
 
 ## Output Requirements
-Return JSON only. No markdown. No explanations outside JSON.
-
-Output format:
-{{
-  "score": 0,
-  "problems": [
-    "problem 1",
-    "problem 2"
-  ],
-  "suggestions": [
-    "suggestion 1",
-    "suggestion 2"
-  ],
-  "revised_json": {{
-    "entities": [
-      {{"name": "...", "type": "..."}}
-    ],
-    "attributes": {{
-      "entity_name": ["attribute_type: value"]
-    }},
-    "triples": [
-      {{"Head": "subject", "Relation": "relation", "Tail": "object"}}
-    ]
-  }}
-}}
-
-## Important Constraints
-1. If the extraction result is already good, keep revised_json identical or nearly identical to the input extraction result.
-2. Do not introduce information not supported by the text.
-3. revised_json must strictly comply with the schema.
-4. Do not output any unsupported entity type, relation, or attribute.
-5. Prefer precise corrections over excessive rewriting.
+Return text only. Do not output JSON. Do not output markdown. Do not explain your reasoning.
 """
 
 
@@ -278,10 +208,19 @@ class ExtractionResult(BaseModel):
 
 
 class ReflectionResult(BaseModel):
-    score: int = Field(default=0)
-    problems: list[str] = Field(default_factory=list)
-    suggestions: list[str] = Field(default_factory=list)
-    revised_json: ExtractionResult = Field(default_factory=ExtractionResult)
+    schema_compliance: int = Field(default=0)
+    faithfulness: int = Field(default=0)
+    completeness: int = Field(default=0)
+    normalization: int = Field(default=0)
+    overall_score: int = Field(default=0)
+    major_problems: list[str] = Field(default_factory=list)
+    minor_problems: list[str] = Field(default_factory=list)
+
+
+class GenerationTripleItem(BaseModel):
+    subject: str = Field(default="")
+    relation: str = Field(default="")
+    object: str = Field(default="")
 
 
 def _normalize_string_list(values: Any) -> list[str]:
@@ -341,6 +280,45 @@ def build_reflection_prompt(
         schema=render_schema(schema),
         extraction_result=json.dumps(extraction_result, ensure_ascii=False, indent=2),
     )
+
+
+def normalize_generation_triplets(raw_triplets: Any) -> list[dict[str, str]]:
+    if raw_triplets in ("", None, []):
+        return []
+    candidate = raw_triplets
+    if isinstance(raw_triplets, str):
+        candidate = json.loads(raw_triplets)
+    if isinstance(candidate, dict):
+        candidate = [candidate]
+    if not isinstance(candidate, list):
+        raise ValueError("Triplets must be a list, dict, or JSON string.")
+
+    normalized_triplets: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for item in candidate:
+        if not isinstance(item, dict):
+            continue
+        subject = str(item.get("subject", item.get("Head", ""))).strip()
+        relation = str(item.get("relation", item.get("Relation", ""))).strip()
+        obj = str(item.get("object", item.get("Tail", ""))).strip()
+        if not subject or not relation or not obj:
+            continue
+        key = (subject, relation, obj)
+        if key in seen:
+            continue
+        seen.add(key)
+        normalized_triplets.append(
+            GenerationTripleItem(subject=subject, relation=relation, object=obj).model_dump()
+        )
+    return normalized_triplets
+
+
+def render_generation_triplets(triplets: list[dict[str, str]]) -> str:
+    return "\n".join(json.dumps(triplet, ensure_ascii=False) for triplet in triplets)
+
+
+def build_generation_prompt(triplets: list[dict[str, str]]) -> str:
+    return REVERSE_GENERATION_AGENT_PROMPT.format(triplets=render_generation_triplets(triplets))
 
 
 def coerce_extraction_result(raw_result: Any) -> dict[str, Any]:
@@ -495,23 +473,27 @@ def enforce_schema_compliance(raw_result: Any, schema: dict[str, list[str]]) -> 
     ).model_dump()
 
 
-def coerce_reflection_result(raw_result: Any, extraction_result: dict[str, Any]) -> dict[str, Any]:
+def _coerce_score(value: Any) -> int:
+    try:
+        score = int(value)
+    except (TypeError, ValueError):
+        score = 0
+    return max(0, min(100, score))
+
+
+def coerce_reflection_result(raw_result: Any) -> dict[str, Any]:
     if not isinstance(raw_result, dict):
         raw_result = {}
 
-    score = raw_result.get("score", 0)
-    try:
-        score = int(score)
-    except (TypeError, ValueError):
-        score = 0
-    score = max(0, min(100, score))
-
     reflection = ReflectionResult.model_validate(
         {
-            "score": score,
-            "problems": _normalize_string_list(raw_result.get("problems", [])),
-            "suggestions": _normalize_string_list(raw_result.get("suggestions", [])),
-            "revised_json": coerce_extraction_result(raw_result.get("revised_json", extraction_result)),
+            "schema_compliance": _coerce_score(raw_result.get("schema_compliance", raw_result.get("overall_score", 0))),
+            "faithfulness": _coerce_score(raw_result.get("faithfulness", raw_result.get("overall_score", 0))),
+            "completeness": _coerce_score(raw_result.get("completeness", raw_result.get("overall_score", 0))),
+            "normalization": _coerce_score(raw_result.get("normalization", raw_result.get("overall_score", 0))),
+            "overall_score": _coerce_score(raw_result.get("overall_score", raw_result.get("score", 0))),
+            "major_problems": _normalize_string_list(raw_result.get("major_problems", raw_result.get("problems", []))),
+            "minor_problems": _normalize_string_list(raw_result.get("minor_problems", raw_result.get("suggestions", []))),
         }
     )
     return reflection.model_dump()

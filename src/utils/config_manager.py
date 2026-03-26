@@ -1,13 +1,24 @@
-import os
-import yaml
-
 class ConfigManager:
-    _config = None
+    _config = {
+        "agent": {
+            "language": "auto",
+            "chunk_char_limit": 1024,
+            "chunk_overlap_sentences": 2,
+        }
+    }
 
     @classmethod
     def get_config(cls):
         if cls._config is None:
-            config_path = os.path.join(os.path.dirname(__file__), "..", "config.yaml")
-            with open(config_path, "r", encoding="utf-8") as file:
-                cls._config = yaml.safe_load(file)
+            cls._config = {
+                "agent": {
+                    "language": "auto",
+                    "chunk_char_limit": 1024,
+                    "chunk_overlap_sentences": 2,
+                }
+            }
         return cls._config
+
+    @classmethod
+    def set_config(cls, config: dict):
+        cls._config = config

@@ -1,0 +1,1843 @@
+2026-03-25 20:02:07 - INFO - [run.py:11] - Starting knowledge graph extraction and reflection pipeline.
+2026-03-25 20:02:07 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 20:02:07 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-27B at https://api.siliconflow.cn/v1
+2026-03-25 20:02:07 - INFO - [llm_def.py:62] - Creating LLM instance for Qwen/Qwen3.5-27B at https://api.siliconflow.cn/v1
+2026-03-25 20:12:25 - INFO - [pipeline.py:99] - Starting reverse generation pipeline.
+2026-03-25 20:12:25 - INFO - [pipeline.py:103] - Running reverse generation agent...
+2026-03-25 20:12:25 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 20:12:25 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 20:12:25 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 20:12:25 - INFO - [pipeline.py:106] - Reverse generation pipeline finished.
+2026-03-25 20:12:25 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 20:12:25 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=False
+2026-03-25 20:12:25 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 20:12:25 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=True
+2026-03-25 20:12:25 - INFO - [process.py:119] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmpjelet6m9.txt
+2026-03-25 20:12:25 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 20:13:03 - INFO - [pipeline.py:99] - Starting reverse generation pipeline.
+2026-03-25 20:13:03 - INFO - [pipeline.py:103] - Running reverse generation agent...
+2026-03-25 20:13:03 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 20:13:03 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 20:13:03 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 20:13:03 - INFO - [pipeline.py:106] - Reverse generation pipeline finished.
+2026-03-25 20:13:03 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 20:13:03 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=False
+2026-03-25 20:13:03 - INFO - [pipeline.py:84] - Running extraction agent...
+2026-03-25 20:13:03 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 20:13:03 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 20:13:03 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 20:13:03 - INFO - [pipeline.py:87] - Running reflection agent...
+2026-03-25 20:13:03 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 20:13:03 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "score": 88,
+              "problems": ["invalid relation", "invalid attribute"],
+              "suggestions": ["remove unsupported labels"],
+              "revised_json": {
+                "entities": [
+                  {"name": "Alice", "type": "person"},
+                  {"name": "Bob", "type": "person"}
+                ],
+                "attributes": {
+                  "Alice": ["profession: engineer", "foo: value"]
+                },
+                "triples": [
+                  {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"},
+                  {"Head": "Alice", "Relation": "partner of", "Tail": "Bob"}
+                ]
+              }
+            }
+            
+2026-03-25 20:13:03 - INFO - [reflection_agent.py:48] - Reflection completed.
+2026-03-25 20:13:03 - INFO - [pipeline.py:90] - Extraction pipeline finished.
+2026-03-25 20:13:03 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 20:13:03 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=True
+2026-03-25 20:13:03 - INFO - [process.py:119] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmp6v9h8tls.txt
+2026-03-25 20:13:03 - INFO - [pipeline.py:84] - Running extraction agent...
+2026-03-25 20:13:03 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 20:13:03 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 20:13:03 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 20:13:03 - INFO - [pipeline.py:87] - Running reflection agent...
+2026-03-25 20:13:03 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 20:13:03 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "score": 88,
+              "problems": ["invalid relation", "invalid attribute"],
+              "suggestions": ["remove unsupported labels"],
+              "revised_json": {
+                "entities": [
+                  {"name": "Alice", "type": "person"},
+                  {"name": "Bob", "type": "person"}
+                ],
+                "attributes": {
+                  "Alice": ["profession: engineer", "foo: value"]
+                },
+                "triples": [
+                  {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"},
+                  {"Head": "Alice", "Relation": "partner of", "Tail": "Bob"}
+                ]
+              }
+            }
+            
+2026-03-25 20:13:03 - INFO - [reflection_agent.py:48] - Reflection completed.
+2026-03-25 20:13:03 - INFO - [pipeline.py:90] - Extraction pipeline finished.
+2026-03-25 20:13:03 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 21:06:18 - INFO - [pipeline.py:99] - Starting reverse generation pipeline.
+2026-03-25 21:06:18 - INFO - [pipeline.py:103] - Running reverse generation agent...
+2026-03-25 21:06:18 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 21:06:18 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 21:06:18 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 21:06:18 - INFO - [pipeline.py:106] - Reverse generation pipeline finished.
+2026-03-25 21:06:18 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 21:06:18 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=False
+2026-03-25 21:06:18 - INFO - [pipeline.py:84] - Running extraction agent...
+2026-03-25 21:06:18 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:06:18 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:06:18 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:06:18 - INFO - [pipeline.py:87] - Running reflection agent...
+2026-03-25 21:06:18 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 21:06:18 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=True
+2026-03-25 21:06:18 - INFO - [process.py:119] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmpoepzlk0r.txt
+2026-03-25 21:06:18 - INFO - [pipeline.py:84] - Running extraction agent...
+2026-03-25 21:06:18 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:06:18 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:06:18 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:06:18 - INFO - [pipeline.py:87] - Running reflection agent...
+2026-03-25 21:06:18 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 21:06:46 - INFO - [pipeline.py:99] - Starting reverse generation pipeline.
+2026-03-25 21:06:46 - INFO - [pipeline.py:103] - Running reverse generation agent...
+2026-03-25 21:06:46 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 21:06:46 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 21:06:46 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 21:06:46 - INFO - [pipeline.py:106] - Reverse generation pipeline finished.
+2026-03-25 21:06:46 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 21:06:46 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=False
+2026-03-25 21:06:46 - INFO - [pipeline.py:84] - Running extraction agent...
+2026-03-25 21:06:46 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:06:46 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:06:46 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:06:46 - INFO - [pipeline.py:87] - Running reflection agent...
+2026-03-25 21:06:46 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:06:46 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:06:46 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:06:46 - INFO - [pipeline.py:90] - Extraction pipeline finished.
+2026-03-25 21:06:46 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 21:06:46 - INFO - [pipeline.py:48] - Preparing data for extraction. use_file=True
+2026-03-25 21:06:46 - INFO - [process.py:119] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmpf6e805q0.txt
+2026-03-25 21:06:46 - INFO - [pipeline.py:84] - Running extraction agent...
+2026-03-25 21:06:46 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:06:46 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:06:46 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:06:46 - INFO - [pipeline.py:87] - Running reflection agent...
+2026-03-25 21:06:46 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:06:46 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:06:46 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:06:46 - INFO - [pipeline.py:90] - Extraction pipeline finished.
+2026-03-25 21:06:46 - INFO - [pipeline.py:79] - Starting extraction pipeline.
+2026-03-25 21:12:29 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:12:29 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 21:12:29 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:12:29 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:12:29 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:12:29 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:12:29 - INFO - [pipeline.py:94] - Skipping reflection agent.
+2026-03-25 21:12:29 - INFO - [pipeline.py:110] - Extraction pipeline finished.
+2026-03-25 21:12:29 - INFO - [pipeline.py:119] - Starting reverse generation pipeline.
+2026-03-25 21:12:29 - INFO - [pipeline.py:123] - Running reverse generation agent...
+2026-03-25 21:12:29 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 21:12:29 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 21:12:29 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 21:12:29 - INFO - [pipeline.py:126] - Reverse generation pipeline finished.
+2026-03-25 21:12:29 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:12:29 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 21:12:29 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:12:29 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:12:29 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:12:29 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:12:29 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:12:29 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:12:29 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:12:29 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:12:29 - INFO - [pipeline.py:110] - Extraction pipeline finished.
+2026-03-25 21:12:29 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:12:29 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:12:29 - INFO - [process.py:133] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmp9o0__j49.txt
+2026-03-25 21:12:29 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:12:29 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:12:29 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:12:29 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:12:29 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:12:29 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:12:29 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:12:29 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:12:29 - INFO - [pipeline.py:110] - Extraction pipeline finished.
+2026-03-25 21:12:29 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:13:18 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:13:18 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 21:13:18 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:13:18 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:13:18 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:13:18 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:13:18 - INFO - [pipeline.py:94] - Skipping reflection agent.
+2026-03-25 21:13:18 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:13:18 - INFO - [pipeline.py:123] - Starting reverse generation pipeline.
+2026-03-25 21:13:18 - INFO - [pipeline.py:127] - Running reverse generation agent...
+2026-03-25 21:13:18 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 21:13:18 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 21:13:18 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 21:13:18 - INFO - [pipeline.py:130] - Reverse generation pipeline finished.
+2026-03-25 21:13:18 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:13:18 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 21:13:18 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:13:18 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:13:18 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:13:18 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:13:18 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:13:18 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:13:18 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:13:18 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:13:18 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:13:18 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:13:18 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:13:18 - INFO - [process.py:133] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmpa341qxnt.txt
+2026-03-25 21:13:18 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:13:18 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:13:18 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:13:18 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:13:18 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:13:18 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:13:18 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:13:18 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:13:18 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:13:18 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:17:29 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 21:17:29 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 21:17:29 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-27B at https://api.siliconflow.cn/v1
+2026-03-25 21:17:29 - INFO - [llm_def.py:62] - Creating LLM instance for Qwen/Qwen3.5-27B at https://api.siliconflow.cn/v1
+2026-03-25 21:17:29 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 21:17:29 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 21:17:29 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:17:29 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:17:29 - INFO - [process.py:127] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 21:17:29 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:17:29 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 21:18:51 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 21:18:51 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 21:18:51 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-35B-A3B at https://api.siliconflow.cn/v1
+2026-03-25 21:18:51 - INFO - [llm_def.py:62] - Creating LLM instance for Qwen/Qwen3.5-35B-A3B at https://api.siliconflow.cn/v1
+2026-03-25 21:18:51 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 21:18:51 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 21:18:51 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:18:51 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:18:51 - INFO - [process.py:127] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 21:18:51 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:18:51 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 21:21:56 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 21:21:56 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 21:21:56 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-35B-A3B at https://api.siliconflow.cn/v1
+2026-03-25 21:21:56 - INFO - [llm_def.py:62] - Creating LLM instance for Qwen/Qwen3.5-35B-A3B at https://api.siliconflow.cn/v1
+2026-03-25 21:21:56 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 21:21:56 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 21:21:56 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:21:56 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:21:56 - INFO - [process.py:127] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 21:21:56 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:21:56 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 21:22:42 - INFO - [base_agent.py:14] - extraction_agent chunk 1/4 raw output:
+
+2026-03-25 21:22:42 - WARNING - [process.py:174] - No JSON structure found in text.
+2026-03-25 21:22:42 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 2/4...
+2026-03-25 21:23:10 - INFO - [base_agent.py:14] - extraction_agent chunk 2/4 raw output:
+
+2026-03-25 21:23:10 - WARNING - [process.py:174] - No JSON structure found in text.
+2026-03-25 21:23:10 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 3/4...
+2026-03-25 21:24:15 - INFO - [llm_def.py:62] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 21:24:48 - INFO - [base_agent.py:14] - extraction_agent chunk 3/4 raw output:
+
+2026-03-25 21:24:48 - WARNING - [process.py:174] - No JSON structure found in text.
+2026-03-25 21:24:48 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 4/4...
+2026-03-25 21:26:04 - INFO - [base_agent.py:14] - extraction_agent chunk 4/4 raw output:
+
+2026-03-25 21:26:04 - WARNING - [process.py:174] - No JSON structure found in text.
+2026-03-25 21:26:04 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:26:04 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:26:04 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:26:33 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+
+{
+  "schema_compliance": 0,
+  "faithfulness": 0,
+  "completeness": 0,
+  "normalization": 0,
+  "overall_score": 0,
+  "major_problems": [
+    "The extraction result is completely empty ({}), containing no entities, relations, or triples.",
+    "All key information from the source text (e.g., RAG definition, R/G modules, benefits, SFT comparison, problems) is missing.",
+    "No knowledge graph structure was formed, rendering the extraction useless for downstream tasks."
+  ],
+  "minor_problems": []
+}
+2026-03-25 21:26:33 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:26:33 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:26:33 - INFO - [run.py:64] - Pipeline execution completed successfully.
+2026-03-25 21:33:20 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:33:20 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 21:33:20 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:33:20 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:33:20 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:33:20 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:33:20 - INFO - [pipeline.py:94] - Skipping reflection agent.
+2026-03-25 21:33:20 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:33:20 - INFO - [pipeline.py:123] - Starting reverse generation pipeline.
+2026-03-25 21:33:20 - INFO - [pipeline.py:127] - Running reverse generation agent...
+2026-03-25 21:33:20 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 21:33:20 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 21:33:20 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 21:33:20 - INFO - [pipeline.py:130] - Reverse generation pipeline finished.
+2026-03-25 21:33:20 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:33:20 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 21:33:20 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:33:20 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:33:20 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:33:20 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:33:20 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:33:20 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:33:20 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:33:20 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:33:20 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:33:20 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:33:20 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:33:20 - INFO - [process.py:133] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmpo7lvgo0e.txt
+2026-03-25 21:33:20 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:33:20 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 21:33:20 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 21:33:20 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:33:20 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:33:20 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:33:20 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 21:33:20 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:33:20 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:33:20 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:33:35 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 21:33:35 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 21:33:35 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 21:33:35 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 21:33:35 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 21:33:35 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 21:33:35 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:33:35 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:33:35 - INFO - [process.py:127] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 21:34:20 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 21:34:20 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 21:34:20 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 21:34:20 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 21:34:20 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 21:34:20 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 21:34:20 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:34:20 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:34:20 - INFO - [process.py:127] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 21:34:20 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:34:20 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 21:34:37 - INFO - [base_agent.py:14] - extraction_agent chunk 1/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "item"},
+    {"name": "LLM", "type": "item"},
+    {"name": "ChatPDF", "type": "item"},
+    {"name": "Baichuan", "type": "item"},
+    {"name": "AiGC 面试宝典", "type": "organization"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "Retrieval-Augmented Generation",
+      "known for": "检索增强生成"
+    },
+    "LLM": {
+      "known for": "文本生成",
+      "known for": "token by token"
+    },
+    "ChatPDF": {
+      "known for": "复刻版"
+    },
+    "AiGC 面试宝典": {
+      "time": "2024 年 01 月 28 日 10:12"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "similar to", "Tail": "LLM"},
+    {"Head": "ChatPDF", "Relation": "similar to", "Tail": "Baichuan"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "LLM"},
+    {"Head": "LLM", "Relation": "used for", "Tail": "文本生成"}
+  ]
+}
+2026-03-25 21:34:37 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 2/4...
+2026-03-25 21:34:59 - INFO - [base_agent.py:14] - extraction_agent chunk 2/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "event"},
+    {"name": "LlamaIndex", "type": "work"},
+    {"name": "SANTA", "type": "work"},
+    {"name": "UAE", "type": "item"},
+    {"name": "Voyage", "type": "item"},
+    {"name": "BGE", "type": "item"},
+    {"name": "Liu", "type": "person"},
+    {"name": "Li", "type": "person"}
+  ],
+  "attributes": {
+    "RAG": {
+      "name": "Retrieval Augmented Generation"
+    },
+    "LlamaIndex": {
+      "time": "2023"
+    },
+    "SANTA": {
+      "time": "2023"
+    },
+    "UAE": {
+      "known for": "嵌入模型"
+    },
+    "Voyage": {
+      "known for": "嵌入模型"
+    },
+    "BGE": {
+      "known for": "嵌入模型"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "based on", "Tail": "Retrieval Augmented Generation"},
+    {"Head": "LlamaIndex", "Relation": "create", "Tail": "Liu"},
+    {"Head": "SANTA", "Relation": "create", "Tail": "Li"},
+    {"Head": "UAE", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "Voyage", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "BGE", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "Liu", "Relation": "create", "Tail": "LlamaIndex"},
+    {"Head": "Li", "Relation": "create", "Tail": "SANTA"}
+  ]
+}
+2026-03-25 21:34:59 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 3/4...
+2026-03-25 21:35:13 - INFO - [base_agent.py:14] - extraction_agent chunk 3/4 raw output:
+{
+  "entities": [
+    {"name": "REPLUG", "type": "method"},
+    {"name": "PKG", "type": "method"},
+    {"name": "LlamaIndex", "type": "method"},
+    {"name": "SANTA", "type": "method"},
+    {"name": "RAG", "type": "method"}
+  ],
+  "attributes": {
+    "REPLUG": {
+      "time": "2023"
+    },
+    "PKG": {
+      "time": "2023"
+    },
+    "LlamaIndex": {
+      "time": "2023"
+    },
+    "SANTA": {
+      "time": "2023"
+    }
+  },
+  "triples": [
+    {"Head": "REPLUG", "Relation": "based on", "Tail": "RAG"},
+    {"Head": "PKG", "Relation": "based on", "Tail": "RAG"},
+    {"Head": "LlamaIndex", "Relation": "based on", "Tail": "RAG"},
+    {"Head": "SANTA", "Relation": "based on", "Tail": "RAG"}
+  ]
+}
+2026-03-25 21:35:13 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 4/4...
+2026-03-25 21:35:14 - INFO - [base_agent.py:14] - extraction_agent chunk 4/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "method"},
+    {"name": "SFT", "type": "method"},
+    {"name": "LLM", "type": "method"}
+  ],
+  "attributes": {},
+  "triples": []
+}
+2026-03-25 21:35:14 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:35:14 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:35:14 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:35:17 - INFO - [base_agent.py:14] - reflection_agent raw output:
+{
+  "schema_compliance": 100,
+  "faithfulness": 100,
+  "completeness": 85,
+  "normalization": 95,
+  "overall_score": 95,
+  "major_problems": [
+    "Missing key entities: 'Retrieval-Augmented Generation' (full name), 'Token by Token', 'KL Divergence', 'Contrastive Learning', 'Chunking', 'Query Rewriting', 'Post-Retrieval Processing'. These are significant concepts mentioned in the text.",
+    "Missing key relations: The text explicitly defines RAG as 'Retrieval-Augmented Generation', but this definition relation is missing. Also, the relationship between 'SFT' and 'LLM' (as a solution) is not captured."
+  ],
+  "minor_problems": [
+    "The entity 'AiGC 面试宝典' is labeled as 'organization', but it is likely a book or document title. However, this is a minor semantic ambiguity.",
+    "Some relations like 'based on' are used loosely for methods derived from RAG concepts, which is acceptable but could be more specific (e.g., 'extends' or 'improves')."
+  ]
+}
+2026-03-25 21:35:17 - ERROR - [process.py:183] - Failed to parse JSON: Expecting ',' delimiter: line 8 column 29 (char 171)
+2026-03-25 21:35:17 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:35:17 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:35:17 - INFO - [run.py:64] - Pipeline execution completed successfully.
+2026-03-25 21:44:01 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 21:44:01 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 21:44:01 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 21:44:01 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 21:44:01 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 21:44:01 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 21:44:01 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 21:44:01 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 21:44:01 - INFO - [process.py:127] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 21:44:01 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 21:44:01 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 21:44:29 - INFO - [base_agent.py:14] - extraction_agent chunk 1/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "item"},
+    {"name": "LLM", "type": "item"},
+    {"name": "ChatPDF", "type": "item"},
+    {"name": "Baichuan", "type": "item"},
+    {"name": "AiGC", "type": "organization"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "Retrieval-Augmented Generation",
+      "known for": "检索增强生成",
+      "used for": "提高预测质量"
+    },
+    "LLM": {
+      "known for": "文本生成",
+      "based on": "概率的 token by token 的形式"
+    },
+    "ChatPDF": {
+      "known for": "复刻版"
+    },
+    "Baichuan": {
+      "known for": "典型案例"
+    },
+    "AiGC": {
+      "name": "AiGC 面试宝典"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "based on", "Tail": "LLM"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "LLM"},
+    {"Head": "ChatPDF", "Relation": "similar to", "Tail": "Baichuan"},
+    {"Head": "ChatPDF", "Relation": "similar to", "Tail": "RAG"},
+    {"Head": "Baichuan", "Relation": "similar to", "Tail": "RAG"},
+    {"Head": "LLM", "Relation": "participate in", "Tail": "RAG"},
+    {"Head": "LLM", "Relation": "participate in", "Tail": "ChatPDF"},
+    {"Head": "LLM", "Relation": "participate in", "Tail": "Baichuan"},
+    {"Head": "RAG", "Relation": "from", "Tail": "AiGC"}
+  ]
+}
+2026-03-25 21:44:29 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 2/4...
+2026-03-25 21:44:33 - INFO - [base_agent.py:14] - extraction_agent chunk 2/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "event"},
+    {"name": "LlamaIndex", "type": "item"},
+    {"name": "SANTA", "type": "item"},
+    {"name": "UAE", "type": "item"},
+    {"name": "Voyage", "type": "item"},
+    {"name": "BGE", "type": "item"},
+    {"name": "Liu", "type": "person"},
+    {"name": "Li", "type": "person"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "检索增强生成",
+      "time": "2023"
+    },
+    "LlamaIndex": {
+      "time": "2023",
+      "known for": "查询编码器后加入一个特殊的适配器"
+    },
+    "SANTA": {
+      "time": "2023",
+      "known for": "理解并处理结构化的信息"
+    },
+    "UAE": {
+      "known for": "在大规模语料库上预训练"
+    },
+    "Voyage": {
+      "known for": "在大规模语料库上预训练"
+    },
+    "BGE": {
+      "known for": "在大规模语料库上预训练"
+    },
+    "Liu": {
+      "known for": "提出 LlamaIndex"
+    },
+    "Li": {
+      "known for": "提出 SANTA 方法"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "based on", "Tail": "LlamaIndex"},
+    {"Head": "RAG", "Relation": "based on", "Tail": "SANTA"},
+    {"Head": "LlamaIndex", "Relation": "create", "Tail": "Liu"},
+    {"Head": "SANTA", "Relation": "create", "Tail": "Li"},
+    {"Head": "UAE", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "Voyage", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "BGE", "Relation": "used for", "Tail": "RAG"}
+  ]
+}
+2026-03-25 21:44:33 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 3/4...
+2026-03-25 21:44:55 - INFO - [base_agent.py:14] - extraction_agent chunk 3/4 raw output:
+{
+  "entities": [
+    {"name": "REPLUG", "type": "work"},
+    {"name": "PKG", "type": "work"},
+    {"name": "LlamaIndex", "type": "work"},
+    {"name": "SANTA", "type": "work"}
+  ],
+  "attributes": {
+    "REPLUG": {
+      "time": "2023",
+      "known for": "监督训练",
+      "used for": "对齐检索模型的输出和大语言模型的偏好"
+    },
+    "PKG": {
+      "time": "2023",
+      "known for": "指令微调",
+      "used for": "将知识注入到白盒模型中"
+    },
+    "LlamaIndex": {
+      "time": "2023",
+      "creator": "Liu",
+      "used for": "优化查询的嵌入表示"
+    },
+    "SANTA": {
+      "time": "2023",
+      "creator": "Li 团队",
+      "used for": "处理结构化的信息"
+    }
+  },
+  "triples": [
+    {"Head": "REPLUG", "Relation": "create", "Tail": "Liu"},
+    {"Head": "PKG", "Relation": "create", "Tail": "Li 团队"},
+    {"Head": "LlamaIndex", "Relation": "create", "Tail": "Liu"},
+    {"Head": "SANTA", "Relation": "create", "Tail": "Li 团队"},
+    {"Head": "REPLUG", "Relation": "similar to", "Tail": "PKG"},
+    {"Head": "LlamaIndex", "Relation": "similar to", "Tail": "SANTA"}
+  ]
+}
+2026-03-25 21:44:55 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 4/4...
+2026-03-25 21:45:01 - INFO - [base_agent.py:14] - extraction_agent chunk 4/4 raw output:
+{
+  "entities": [
+    {
+      "name": "RAG",
+      "type": "item"
+    },
+    {
+      "name": "SFT",
+      "type": "item"
+    },
+    {
+      "name": "LLM",
+      "type": "item"
+    },
+    {
+      "name": "QA",
+      "type": "item"
+    },
+    {
+      "name": "文本摘要",
+      "type": "item"
+    },
+    {
+      "name": "对话系统",
+      "type": "item"
+    }
+  ],
+  "attributes": {
+    "RAG": {
+      "known for": "知识密集型任务",
+      "known for": "可扩展性",
+      "known for": "准确性",
+      "known for": "可控性",
+      "known for": "可解释性",
+      "known for": "多功能性",
+      "known for": "及时性",
+      "known for": "定制性",
+      "known for": "安全性"
+    },
+    "SFT": {
+      "known for": "减少模型大小和训练成本",
+      "known for": "允许轻松扩展知识"
+    },
+    "LLM": {
+      "known for": "需要重新训练整个模型"
+    }
+  },
+  "triples": [
+    {
+      "Head": "RAG",
+      "Relation": "similar to",
+      "Tail": "SFT"
+    },
+    {
+      "Head": "RAG",
+      "Relation": "better than",
+      "Tail": "LLM"
+    },
+    {
+      "Head": "RAG",
+      "Relation": "used for",
+      "Tail": "QA"
+    },
+    {
+      "Head": "RAG",
+      "Relation": "used for",
+      "Tail": "文本摘要"
+    },
+    {
+      "Head": "RAG",
+      "Relation": "used for",
+      "Tail": "对话系统"
+    },
+    {
+      "Head": "SFT",
+      "Relation": "used for",
+      "Tail": "LLM"
+    }
+  ]
+}
+2026-03-25 21:45:01 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 21:45:01 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 21:45:01 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 21:45:28 - INFO - [base_agent.py:14] - reflection_agent raw output:
+{
+  "schema_compliance": 100,
+  "faithfulness": 85,
+  "completeness": 70,
+  "normalization": 90,
+  "overall_score": 86,
+  "major_problems": [
+    "Faithfulness Error: The triple 'REPLUG' -> 'create' -> 'Liu' is incorrect. The text states Liu proposed LlamaIndex, while REPLUG is mentioned separately as a method using KL divergence for supervision, with no author named.",
+    "Faithfulness Error: The triple 'PKG' -> 'create' -> 'Li 团队' is incorrect. The text states Li's team proposed SANTA, while PKG is described as a separate method injecting knowledge via instruction fine-tuning.",
+    "Faithfulness Error: The triple 'SANTA' -> 'create' -> 'Li 团队' is partially correct but the text explicitly links 'Li team' to SANTA, whereas 'Liu' is linked to LlamaIndex. The extraction correctly identifies the authors for their respective works, but the previous errors regarding REPLUG and PKG confuse the attribution.",
+    "Faithfulness Error: The triple 'ChatPDF' -> 'similar to' -> 'Baichuan' is not supported. The text lists them as separate examples (6.1 and 6.2) without stating they are similar to each other.",
+    "Faithfulness Error: The triple 'RAG' -> 'based on' -> 'LlamaIndex' is misleading. LlamaIndex is a framework/tool mentioned in the context of query optimization, not the foundational basis of RAG itself.",
+    "Completeness Omission: Missing key entities such as 'Retrieval-Augmented Generation' (full name), 'token by token', 'embedding models' (general), 'chunking', 're-ranking', 'compression', 'multi-modal retrieval-based LMs', and specific issues like 'hallucination', 'timeliness', 'data security'."
+  ],
+  "minor_problems": [
+    "The entity type for 'AiGC' is correctly identified as 'organization', but the source text implies it's the source of the interview guide, which is a minor contextual nuance.",
+    "Some relations like 'used for' are generic and could be more specific (e.g., 'applied in' vs 'used for').",
+    "The extraction misses the distinction between 'R' (Retriever) and 'G' (Generator) modules as separate high-level concepts, focusing only on specific techniques within them."
+  ]
+}
+2026-03-25 21:45:28 - ERROR - [process.py:183] - Failed to parse JSON: Expecting ',' delimiter: line 8 column 38 (char 179)
+2026-03-25 21:45:28 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 21:45:28 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 21:45:28 - INFO - [run.py:64] - Pipeline execution completed successfully.
+2026-03-25 22:26:10 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 22:26:10 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 22:26:10 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:26:10 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:26:10 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 22:26:10 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 22:26:10 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:26:10 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 22:26:10 - INFO - [process.py:127] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 22:26:11 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:26:11 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 22:26:26 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 22:26:26 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 22:26:26 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:26:26 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:26:26 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 22:26:26 - INFO - [run.py:57] - Executing pipeline for reverse generation...
+2026-03-25 22:26:26 - INFO - [pipeline.py:123] - Starting reverse generation pipeline.
+2026-03-25 22:26:26 - INFO - [pipeline.py:127] - Running reverse generation agent...
+2026-03-25 22:26:26 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 22:26:29 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979.
+2026-03-25 22:26:29 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 22:26:29 - INFO - [pipeline.py:130] - Reverse generation pipeline finished.
+2026-03-25 22:26:29 - INFO - [run.py:64] - Pipeline execution completed successfully.
+2026-03-25 22:30:38 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:30:38 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 22:30:38 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:30:38 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 22:30:38 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 22:30:38 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:30:38 - INFO - [pipeline.py:94] - Skipping reflection agent.
+2026-03-25 22:30:38 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:30:38 - INFO - [pipeline.py:123] - Starting reverse generation pipeline.
+2026-03-25 22:30:38 - INFO - [pipeline.py:127] - Running reverse generation agent...
+2026-03-25 22:30:38 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 22:30:38 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 22:30:38 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 22:30:38 - INFO - [pipeline.py:130] - Reverse generation pipeline finished.
+2026-03-25 22:30:38 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:30:38 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 22:30:38 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:30:38 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 22:30:38 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 22:30:38 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:30:38 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 22:30:38 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 22:30:38 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 22:30:38 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 22:30:38 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:30:38 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:30:38 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 22:30:38 - INFO - [process.py:169] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmpud9aboef.txt
+2026-03-25 22:30:38 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:30:38 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 22:30:38 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 22:30:38 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:30:38 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 22:30:38 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 22:30:38 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 22:30:38 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 22:30:38 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:30:38 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:34:32 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 22:34:32 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 22:34:32 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:34:32 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:34:32 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 22:34:32 - INFO - [run.py:57] - Executing pipeline for reverse generation...
+2026-03-25 22:34:32 - INFO - [pipeline.py:123] - Starting reverse generation pipeline.
+2026-03-25 22:34:32 - INFO - [pipeline.py:127] - Running reverse generation agent...
+2026-03-25 22:34:32 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 22:34:35 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+张三毕业于浙江大学，目前就职于位于杭州的星河科技，担任数据分析师。
+2026-03-25 22:34:35 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 22:34:35 - INFO - [pipeline.py:130] - Reverse generation pipeline finished.
+2026-03-25 22:34:35 - INFO - [run.py:64] - Pipeline execution completed successfully.
+2026-03-25 22:35:24 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 22:35:24 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 22:35:24 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:35:24 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:35:24 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 22:35:24 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 22:35:24 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:35:24 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 22:35:24 - INFO - [process.py:163] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 22:35:24 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:35:24 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 22:35:43 - INFO - [base_agent.py:14] - extraction_agent chunk 1/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "item"},
+    {"name": "LLM", "type": "item"},
+    {"name": "ChatPDF", "type": "item"},
+    {"name": "Baichuan", "type": "item"},
+    {"name": "AiGC", "type": "organization"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "Retrieval-Augmented Generation",
+      "known for": "提高预测质量"
+    },
+    "LLM": {
+      "known for": "文本生成",
+      "known for": "归纳"
+    },
+    "ChatPDF": {
+      "known for": "RAG 典型案例"
+    },
+    "Baichuan": {
+      "known for": "RAG 典型案例"
+    },
+    "AiGC": {
+      "known for": "面试宝典"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "used for", "Tail": "提高预测质量"},
+    {"Head": "LLM", "Relation": "used for", "Tail": "文本生成"},
+    {"Head": "LLM", "Relation": "used for", "Tail": "归纳"},
+    {"Head": "ChatPDF", "Relation": "participate in", "Tail": "RAG"},
+    {"Head": "Baichuan", "Relation": "participate in", "Tail": "RAG"},
+    {"Head": "AiGC", "Relation": "establish", "Tail": "面试宝典"}
+  ]
+}
+2026-03-25 22:35:43 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 2/4...
+2026-03-25 22:35:56 - INFO - [base_agent.py:14] - extraction_agent chunk 2/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "work"},
+    {"name": "LlamaIndex", "type": "work"},
+    {"name": "SANTA", "type": "work"},
+    {"name": "Liu", "type": "person"},
+    {"name": "Li", "type": "person"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "RAG for LLMs"
+    },
+    "LlamaIndex": {
+      "time": "2023"
+    },
+    "SANTA": {
+      "time": "2023"
+    },
+    "Liu": {
+      "time": "2023"
+    },
+    "Li": {
+      "time": "2023"
+    }
+  },
+  "triples": [
+    {"Head": "Liu", "Relation": "create", "Tail": "LlamaIndex"},
+    {"Head": "Li", "Relation": "create", "Tail": "SANTA"}
+  ]
+}
+2026-03-25 22:35:56 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 3/4...
+2026-03-25 22:36:08 - INFO - [base_agent.py:14] - extraction_agent chunk 3/4 raw output:
+{
+  "entities": [
+    {"name": "REPLUG", "type": "method"},
+    {"name": "PKG", "type": "method"},
+    {"name": "RAG", "type": "method"}
+  ],
+  "attributes": {
+    "REPLUG": {
+      "known for": "监督训练",
+      "known for": "计算 KL 散度"
+    },
+    "PKG": {
+      "known for": "指令微调",
+      "known for": "知识注入"
+    },
+    "RAG": {
+      "known for": "检索增强生成"
+    }
+  },
+  "triples": [
+    {"Head": "REPLUG", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "PKG", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "REPLUG", "Relation": "similar to", "Tail": "PKG"}
+  ]
+}
+2026-03-25 22:36:08 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 4/4...
+2026-03-25 22:36:12 - INFO - [base_agent.py:14] - extraction_agent chunk 4/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "item"},
+    {"name": "SFT", "type": "item"},
+    {"name": "LLM", "type": "item"},
+    {"name": "QA", "type": "item"},
+    {"name": "文本摘要", "type": "item"},
+    {"name": "对话系统", "type": "item"}
+  ],
+  "attributes": {
+    "RAG": {
+      "known for": "知识密集型的任务",
+      "known for": "QA",
+      "known for": "文本摘要",
+      "known for": "对话系统"
+    },
+    "SFT": {
+      "known for": "减少模型大小和训练成本",
+      "known for": "允许轻松扩展知识"
+    },
+    "LLM": {
+      "known for": "减少模型大小和训练成本",
+      "known for": "允许轻松扩展知识"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "used for", "Tail": "知识密集型的任务"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "QA"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "文本摘要"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "对话系统"},
+    {"Head": "SFT", "Relation": "used for", "Tail": "减少模型大小和训练成本"},
+    {"Head": "SFT", "Relation": "used for", "Tail": "允许轻松扩展知识"},
+    {"Head": "LLM", "Relation": "used for", "Tail": "减少模型大小和训练成本"},
+    {"Head": "LLM", "Relation": "used for", "Tail": "允许轻松扩展知识"}
+  ]
+}
+2026-03-25 22:36:12 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:36:12 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 22:36:12 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 22:36:39 - INFO - [base_agent.py:14] - reflection_agent raw output:
+{
+  "schema_compliance": 95,
+  "faithfulness": 90,
+  "completeness": 75,
+  "normalization": 85,
+  "overall_score": 86,
+  "major_problems": [
+    "Faithfulness Error: The triple 'LLM' -> 'used for' -> '归纳' is misleading. The text states online LLMs 'only complete an induction function' (仅仅完成一个归纳的功能) in the context of data security/localization, not as a general definition of what LLMs are used for. This misrepresents the source text's specific argument.",
+    "Faithfulness Error: The triple 'SFT' -> 'used for' -> '减少模型大小和训练成本' is inaccurate. The text explicitly states RAG reduces model size and training costs compared to SFT, implying SFT is the more resource-intensive method, not the one that reduces costs.",
+    "Completeness Omission: Missing key entities such as 'UAE', 'Voyage', 'BGE' (embedding models), 'REPLUG', 'PKG' (methods), and 'ChatPDF', 'Baichuan' (cases) are present but their relationships to specific concepts (e.g., UAE is an embedding model) are missing.",
+    "Completeness Omission: Missing critical relationships, such as 'RAG' -> 'solves' -> 'Hallucination', 'RAG' -> 'solves' -> 'Timeliness', 'RAG' -> 'solves' -> 'Data Security', and the comparison 'RAG' vs 'SFT' on dimensions like 'Scalability', 'Accuracy', etc."
+  ],
+  "minor_problems": [
+    "Entity Type Inconsistency: 'LlamaIndex' and 'SANTA' are labeled as 'work'. While acceptable, 'method' or 'framework' might be more precise depending on the schema's granularity.",
+    "Relation Redundancy: Multiple triples use 'used for' for different contexts (e.g., RAG for QA, RAG for Text Summarization). While valid, a more specific relation like 'supports_task' might be clearer if the schema allows.",
+    "Missing Context: The relationship between 'Liu' and 'LlamaIndex' is correct, but the specific contribution (adapter for query encoder) is not captured in the triples."
+  ]
+}
+2026-03-25 22:36:39 - ERROR - [process.py:219] - Failed to parse JSON: Expecting ',' delimiter: line 8 column 38 (char 178)
+2026-03-25 22:36:39 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 22:36:39 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:36:39 - INFO - [run.py:64] - Pipeline execution completed successfully.
+2026-03-25 22:43:26 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:43:26 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 22:43:26 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:43:26 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 22:43:26 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 22:43:26 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:43:26 - INFO - [pipeline.py:94] - Skipping reflection agent.
+2026-03-25 22:43:26 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:43:26 - INFO - [pipeline.py:123] - Starting reverse generation pipeline.
+2026-03-25 22:43:26 - INFO - [pipeline.py:127] - Running reverse generation agent...
+2026-03-25 22:43:26 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 22:43:26 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+The Legend of the Golden Gun and The Sacketts were both published in 1979. Louis L'Amour wrote the screenplay for the film The Shadow Riders and is a renowned author in the Western genre.
+2026-03-25 22:43:26 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 22:43:26 - INFO - [pipeline.py:130] - Reverse generation pipeline finished.
+2026-03-25 22:43:26 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:43:26 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 22:43:26 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:43:26 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 22:43:26 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 22:43:26 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:43:26 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 22:43:26 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 22:43:26 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 22:43:26 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 22:43:26 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:43:26 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:43:26 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 22:43:26 - INFO - [process.py:169] - Reading TXT file: /var/folders/hr/fyk_rmg13wq9pld3k8451pd40000gp/T/tmpys6bqlam.txt
+2026-03-25 22:43:26 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:43:26 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 22:43:26 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+
+        {
+          "entities": [
+            {"name": "Alice", "type": "person"},
+            {"name": "Bob", "type": "person"}
+          ],
+          "attributes": {
+            "Alice": ["profession: engineer"]
+          },
+          "triples": [
+            {"Head": "Alice", "Relation": "spouse of", "Tail": "Bob"}
+          ]
+        }
+        
+2026-03-25 22:43:26 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:43:26 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 22:43:26 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 22:43:26 - INFO - [base_agent.py:14] - reflection_agent raw output:
+
+            {
+              "schema_compliance": 92,
+              "faithfulness": 89,
+              "completeness": 86,
+              "normalization": 85,
+              "overall_score": 88,
+              "major_problems": ["invalid relation"],
+              "minor_problems": ["invalid attribute"]
+            }
+            
+2026-03-25 22:43:26 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 22:43:26 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:43:26 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:47:07 - INFO - [run.py:11] - Starting knowledge graph pipeline.
+2026-03-25 22:47:07 - INFO - [run.py:17] - Loaded configuration from examples/config/KG.yaml
+2026-03-25 22:47:07 - INFO - [run.py:19] - Initializing LLM model with Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:47:07 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 22:47:07 - INFO - [run.py:41] - Using chunk settings: chunk_char_limit=1024, chunk_overlap_sentences=2
+2026-03-25 22:47:07 - INFO - [run.py:48] - Executing pipeline for extraction...
+2026-03-25 22:47:07 - INFO - [pipeline.py:82] - Starting extraction pipeline.
+2026-03-25 22:47:07 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 22:47:07 - INFO - [process.py:163] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 22:47:07 - INFO - [pipeline.py:87] - Running extraction agent...
+2026-03-25 22:47:07 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 22:47:11 - INFO - [base_agent.py:14] - extraction_agent chunk 1/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "item"},
+    {"name": "LLM", "type": "item"},
+    {"name": "ChatPDF", "type": "item"},
+    {"name": "Baichuan", "type": "item"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "Retrieval-Augmented Generation",
+      "known for": "检索增强生成"
+    },
+    "LLM": {
+      "known for": "文本生成",
+      "known for": "概率的 token by token 的形式"
+    },
+    "ChatPDF": {
+      "known for": "复刻版"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "used for", "Tail": "LLM"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "检索"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "生成"},
+    {"Head": "ChatPDF", "Relation": "similar to", "Tail": "Baichuan"}
+  ]
+}
+2026-03-25 22:47:11 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 2/4...
+2026-03-25 22:47:40 - INFO - [base_agent.py:14] - extraction_agent chunk 2/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "event"},
+    {"name": "LlamaIndex", "type": "work"},
+    {"name": "SANTA", "type": "work"},
+    {"name": "UAE", "type": "item"},
+    {"name": "Voyage", "type": "item"},
+    {"name": "BGE", "type": "item"},
+    {"name": "Liu", "type": "person"},
+    {"name": "Li", "type": "person"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "检索增强生成"
+    },
+    "LlamaIndex": {
+      "time": "2023 年"
+    },
+    "SANTA": {
+      "time": "2023 年"
+    },
+    "UAE": {
+      "known for": "嵌入模型"
+    },
+    "Voyage": {
+      "known for": "嵌入模型"
+    },
+    "BGE": {
+      "known for": "嵌入模型"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "based on", "Tail": "检索增强生成"},
+    {"Head": "LlamaIndex", "Relation": "create", "Tail": "Liu"},
+    {"Head": "SANTA", "Relation": "create", "Tail": "Li"},
+    {"Head": "UAE", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "Voyage", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "BGE", "Relation": "used for", "Tail": "RAG"}
+  ]
+}
+2026-03-25 22:47:40 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 3/4...
+2026-03-25 22:47:59 - INFO - [base_agent.py:14] - extraction_agent chunk 3/4 raw output:
+{
+  "entities": [
+    {"name": "REPLUG", "type": "event"},
+    {"name": "PKG", "type": "event"},
+    {"name": "LlamaIndex", "type": "event"},
+    {"name": "SANTA", "type": "event"}
+  ],
+  "attributes": {
+    "REPLUG": {
+      "time": "2023",
+      "known for": "监督训练",
+      "used for": "对齐检索模型的输出和大语言模型的偏好"
+    },
+    "PKG": {
+      "time": "2023",
+      "known for": "指令微调",
+      "used for": "将知识注入到白盒模型中"
+    },
+    "LlamaIndex": {
+      "time": "2023",
+      "creator": "Liu",
+      "used for": "优化查询的嵌入表示"
+    },
+    "SANTA": {
+      "time": "2023",
+      "creator": "Li 团队",
+      "used for": "处理结构化的信息"
+    }
+  },
+  "triples": [
+    {"Head": "REPLUG", "Relation": "used for", "Tail": "对齐检索模型的输出和大语言模型的偏好"},
+    {"Head": "PKG", "Relation": "used for", "Tail": "将知识注入到白盒模型中"},
+    {"Head": "LlamaIndex", "Relation": "used for", "Tail": "优化查询的嵌入表示"},
+    {"Head": "SANTA", "Relation": "used for", "Tail": "处理结构化的信息"}
+  ]
+}
+2026-03-25 22:47:59 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 4/4...
+2026-03-25 22:48:06 - INFO - [base_agent.py:14] - extraction_agent chunk 4/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "method"},
+    {"name": "SFT", "type": "method"},
+    {"name": "LLM", "type": "method"}
+  ],
+  "attributes": {},
+  "triples": [
+    {"Head": "RAG", "Relation": "similar to", "Tail": "SFT"},
+    {"Head": "RAG", "Relation": "better than", "Tail": "LLM"}
+  ]
+}
+2026-03-25 22:48:06 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 22:48:06 - INFO - [pipeline.py:91] - Running reflection agent...
+2026-03-25 22:48:06 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 22:48:11 - INFO - [base_agent.py:14] - reflection_agent raw output:
+{
+  "schema_compliance": 85,
+  "faithfulness": 90,
+  "completeness": 75,
+  "normalization": 80,
+  "overall_score": 82,
+  "major_problems": [
+    "Entity type errors: 'REPLUG' and 'PKG' are methods/approaches, not 'event'. 'LlamaIndex' and 'SANTA' are frameworks/methods, not 'work' (though 'work' is ambiguous, 'method' or 'framework' is more precise).",
+    "Relation direction error: 'LlamaIndex' was created by 'Liu', but the triple has Head='LlamaIndex', Tail='Liu' with relation 'create'. It should be Head='Liu', Tail='LlamaIndex', Relation='created'.",
+    "Relation direction error: 'SANTA' was proposed by 'Li', but the triple has Head='SANTA', Tail='Li' with relation 'create'. It should be Head='Li', Tail='SANTA', Relation='proposed'.",
+    "Missing key entities: 'UAE', 'Voyage', 'BGE' are missing from the 'entities' list in the extraction result (they appear in triples but not in the entities array, which is a schema violation if the schema requires all referenced entities to be listed).",
+    "Missing key concepts: 'Retrieval-Augmented Generation' (full name), 'SFT' (Supervised Fine-Tuning), 'Hallucination', 'Timeliness', 'Data Security' are mentioned in text but not fully captured as entities or relations."
+  ],
+  "minor_problems": [
+    "The relation 'used for' is used very generically for many triples; more specific relations (e.g., 'implements', 'addresses', 'improves') would be better.",
+    "The triple 'RAG' -> 'better than' -> 'LLM' is slightly misleading as the text compares RAG vs SFT, and mentions RAG solves LLM limitations, but direct 'better than' might be an oversimplification of the comparison context."
+  ]
+}
+2026-03-25 22:48:11 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 22:48:11 - INFO - [pipeline.py:114] - Extraction pipeline finished.
+2026-03-25 22:48:11 - INFO - [run.py:64] - Pipeline execution completed successfully.
+2026-03-25 23:00:11 - INFO - [llm_def.py:83] - Creating LLM instance for Qwen/Qwen3.5-9B at https://api.siliconflow.cn/v1
+2026-03-25 23:00:12 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=True
+2026-03-25 23:00:12 - INFO - [process.py:163] - Parsing PDF file: /Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf
+2026-03-25 23:00:12 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/4...
+2026-03-25 23:00:15 - INFO - [base_agent.py:14] - extraction_agent chunk 1/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "event"},
+    {"name": "LLM", "type": "item"},
+    {"name": "ChatPDF", "type": "item"},
+    {"name": "Baichuan", "type": "item"},
+    {"name": "AiGC 面试宝典", "type": "organization"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "Retrieval-Augmented Generation",
+      "time": "2024 年 01 月 28 日 10:12"
+    },
+    "LLM": {
+      "known for": "幻觉问题",
+      "known for": "时效性问题",
+      "known for": "数据安全问题"
+    },
+    "ChatPDF": {
+      "known for": "RAG 典型案例"
+    },
+    "Baichuan": {
+      "known for": "RAG 典型案例"
+    },
+    "AiGC 面试宝典": {
+      "known for": "大模型 RAG 经验面"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "based on", "Tail": "LLM"},
+    {"Head": "ChatPDF", "Relation": "participate in", "Tail": "RAG"},
+    {"Head": "Baichuan", "Relation": "participate in", "Tail": "RAG"},
+    {"Head": "RAG", "Relation": "from", "Tail": "AiGC 面试宝典"}
+  ]
+}
+2026-03-25 23:00:15 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 2/4...
+2026-03-25 23:00:18 - INFO - [base_agent.py:14] - extraction_agent chunk 2/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "event"},
+    {"name": "LlamaIndex", "type": "work"},
+    {"name": "SANTA", "type": "work"},
+    {"name": "UAE", "type": "item"},
+    {"name": "Voyage", "type": "item"},
+    {"name": "BGE", "type": "item"},
+    {"name": "Liu", "type": "person"},
+    {"name": "Li", "type": "person"}
+  ],
+  "attributes": {
+    "RAG": {
+      "title": "检索增强生成"
+    },
+    "LlamaIndex": {
+      "time": "2023 年"
+    },
+    "SANTA": {
+      "time": "2023 年"
+    },
+    "UAE": {
+      "known for": "嵌入模型"
+    },
+    "Voyage": {
+      "known for": "嵌入模型"
+    },
+    "BGE": {
+      "known for": "嵌入模型"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "based on", "Tail": "检索增强生成"},
+    {"Head": "LlamaIndex", "Relation": "create", "Tail": "Liu"},
+    {"Head": "SANTA", "Relation": "create", "Tail": "Li"},
+    {"Head": "UAE", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "Voyage", "Relation": "used for", "Tail": "RAG"},
+    {"Head": "BGE", "Relation": "used for", "Tail": "RAG"}
+  ]
+}
+2026-03-25 23:00:18 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 3/4...
+2026-03-25 23:00:31 - INFO - [base_agent.py:14] - extraction_agent chunk 3/4 raw output:
+{
+  "entities": [
+    {"name": "REPLUG", "type": "method"},
+    {"name": "PKG", "type": "method"},
+    {"name": "RAG", "type": "method"},
+    {"name": "LlamaIndex", "type": "method"},
+    {"name": "SANTA", "type": "method"}
+  ],
+  "attributes": {
+    "REPLUG": {
+      "time": "2023"
+    },
+    "PKG": {
+      "time": "2023"
+    },
+    "LlamaIndex": {
+      "time": "2023"
+    },
+    "SANTA": {
+      "time": "2023"
+    }
+  },
+  "triples": [
+    {"Head": "REPLUG", "Relation": "create", "Tail": "LlamaIndex"},
+    {"Head": "PKG", "Relation": "create", "Tail": "LlamaIndex"},
+    {"Head": "LlamaIndex", "Relation": "create", "Tail": "SANTA"}
+  ]
+}
+2026-03-25 23:00:31 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 4/4...
+2026-03-25 23:00:32 - INFO - [base_agent.py:14] - extraction_agent chunk 4/4 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "method"},
+    {"name": "SFT", "type": "method"},
+    {"name": "LLM", "type": "method"}
+  ],
+  "attributes": {},
+  "triples": [
+    {"Head": "RAG", "Relation": "similar to", "Tail": "SFT"},
+    {"Head": "RAG", "Relation": "better than", "Tail": "LLM"},
+    {"Head": "SFT", "Relation": "similar to", "Tail": "LLM"}
+  ]
+}
+2026-03-25 23:00:32 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 23:00:32 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 23:00:37 - INFO - [base_agent.py:14] - reflection_agent raw output:
+{
+  "schema_compliance": 85,
+  "faithfulness": 60,
+  "completeness": 70,
+  "normalization": 75,
+  "overall_score": 72,
+  "major_problems": [
+    "Faithfulness Error: The triple 'Head: REPLUG, Relation: create, Tail: LlamaIndex' is incorrect. The text states LlamaIndex was proposed by Liu, while REPLUG is a separate method mentioned in the context of alignment training, not created by LlamaIndex.",
+    "Faithfulness Error: The triple 'Head: LlamaIndex, Relation: create, Tail: SANTA' is incorrect. The text states SANTA was proposed by the Li team, not LlamaIndex.",
+    "Faithfulness Error: The triple 'Head: RAG, Relation: better than, Tail: LLM' is misleading. The text compares RAG vs SFT, stating RAG is better than SFT in specific aspects (scalability, accuracy, etc.), not necessarily that RAG is better than LLMs in general (LLMs are the base component of RAG).",
+    "Schema Compliance: 'AiGC 面试宝典' is labeled as 'organization', but the text presents it as the source of the article (likely a blog or book title), not necessarily an organization. 'Liu' and 'Li' are labeled as 'person', but the text only provides surnames without full names, which is acceptable but less precise.",
+    "Completeness: Missing key entities such as 'Retrieval-Augmented Generation' (full name), 'Token by token', 'Hallucination', 'Timeliness', 'Data Security', 'ChatPDF', 'Multi-modal retrieval-based LMs', and specific techniques like 'Query Rewriting', 'Embedding Transformation', 'Post-Retrieval Processing', 'Chunking', 'Fine-tuning Embedding Models', 'Knowledge Injection', 'Contrastive Learning', 'KL Divergence', 'Adapter', 'Masking Strategy', 'Supervised Fine-Tuning', 'Role-based Access Control'.",
+    "Completeness: Missing critical triples describing the core RAG workflow (e.g., RAG retrieves documents, LLM generates answers based on retrieved documents), the specific benefits of RAG (accuracy, controllability, interpretability, versatility, timeliness, customizability, security), and the comparison between RAG and SFT across multiple dimensions.",
+    "Normalization: Some entities like 'UAE', 'Voyage', 'BGE' are correctly identified as items/models, but the relationship 'used for' is generic. The distinction between 'method' and 'work' for items like LlamaIndex and SANTA could be clearer based on the text's context (LlamaIndex is a framework/tool, SANTA is a method/pre-training approach).",
+    "Minor Problems": [
+      "The triple 'Head: RAG, Relation: from, Tail: AiGC 面试宝典' implies RAG originates from this source, whereas the text indicates this source discusses RAG.",
+      "The triple 'Head: SFT, Relation: similar to, Tail: LLM' is vague; the text says SFT is a common solution for LLM problems, not necessarily 'similar to' LLMs in a structural sense.",
+      "Missing the explicit definition of RAG as 'Retrieval-Augmented Generation' in the triples."
+    ]
+  },
+  "minor_problems": [
+    "Some relations are too generic (e.g., 'used for', 'participate in') and could be more specific (e.g., 'employs', 'implements').",
+    "The extraction of 'Liu' and 'Li' as persons is correct but lacks full names available in the text (if any) or context about their specific contributions beyond proposing the methods."
+  ]
+}
+2026-03-25 23:00:37 - ERROR - [process.py:227] - Failed to parse JSON: Expecting ',' delimiter: line 15 column 21 (char 2431)
+2026-03-25 23:00:37 - INFO - [reflection_agent.py:43] - Reflection completed.
+2026-03-25 23:00:37 - INFO - [reverse_generation_agent.py:21] - Invoking LLM for reverse generation...
+2026-03-25 23:00:38 - INFO - [base_agent.py:14] - reverse_generation_agent raw output:
+RAG 是一种基于检索增强生成（Retrieval-Augmented Generation）的技术，源自《AiGC 面试宝典》。它基于大语言模型（LLM），在效果上优于单纯的 LLM，且与监督微调（SFT）类似。RAG 被 ChatPDF、Baichuan、UAE、Voyage 和 BGE 所采用。在 RAG 的发展中，Liu 由 LlamaIndex 创建，Li 由 SANTA 创建，而 LlamaIndex 则由 REPLUG 和 PKG 创建，同时 LlamaIndex 也创建了 SANTA。
+2026-03-25 23:00:38 - INFO - [reverse_generation_agent.py:45] - Reverse generation completed.
+2026-03-25 23:00:38 - INFO - [pipeline.py:50] - Preparing data for extraction. use_file=False
+2026-03-25 23:00:38 - INFO - [extraction_agent.py:25] - Invoking LLM for extraction on chunk 1/1...
+2026-03-25 23:00:46 - INFO - [base_agent.py:14] - extraction_agent chunk 1/1 raw output:
+{
+  "entities": [
+    {"name": "RAG", "type": "item"},
+    {"name": "AiGC 面试宝典", "type": "work"},
+    {"name": "LLM", "type": "item"},
+    {"name": "SFT", "type": "item"},
+    {"name": "ChatPDF", "type": "item"},
+    {"name": "Baichuan", "type": "item"},
+    {"name": "UAE", "type": "item"},
+    {"name": "Voyage", "type": "item"},
+    {"name": "BGE", "type": "item"},
+    {"name": "Liu", "type": "person"},
+    {"name": "LlamaIndex", "type": "organization"},
+    {"name": "Li", "type": "person"},
+    {"name": "SANTA", "type": "organization"},
+    {"name": "REPLUG", "type": "organization"},
+    {"name": "PKG", "type": "organization"}
+  ],
+  "attributes": {
+    "RAG": {
+      "name": "Retrieval-Augmented Generation",
+      "known for": "基于检索增强生成"
+    },
+    "AiGC 面试宝典": {
+      "title": "AiGC 面试宝典"
+    },
+    "LLM": {
+      "name": "大语言模型"
+    },
+    "SFT": {
+      "name": "监督微调"
+    }
+  },
+  "triples": [
+    {"Head": "RAG", "Relation": "based on", "Tail": "LLM"},
+    {"Head": "RAG", "Relation": "similar to", "Tail": "SFT"},
+    {"Head": "RAG", "Relation": "from", "Tail": "AiGC 面试宝典"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "ChatPDF"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "Baichuan"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "UAE"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "Voyage"},
+    {"Head": "RAG", "Relation": "used for", "Tail": "BGE"},
+    {"Head": "Liu", "Relation": "create", "Tail": "LlamaIndex"},
+    {"Head": "Li", "Relation": "create", "Tail": "SANTA"},
+    {"Head": "REPLUG", "Relation": "create", "Tail": "LlamaIndex"},
+    {"Head": "PKG", "Relation": "create", "Tail": "LlamaIndex"},
+    {"Head": "LlamaIndex", "Relation": "create", "Tail": "SANTA"}
+  ]
+}
+2026-03-25 23:00:46 - INFO - [extraction_agent.py:48] - Extraction completed.
+2026-03-25 23:00:46 - INFO - [reflection_agent.py:21] - Invoking LLM for reflection...
+2026-03-25 23:00:52 - INFO - [base_agent.py:14] - reflection_agent raw output:
+{
+  "schema_compliance": 100,
+  "faithfulness": 100,
+  "completeness": 100,
+  "normalization": 100,
+  "overall_score": 100,
+  "major_problems": [],
+  "minor_problems": []
+}
+2026-03-25 23:00:52 - INFO - [reflection_agent.py:43] - Reflection completed.

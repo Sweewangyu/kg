@@ -1,5 +1,5 @@
 from models.llm_def import BaseEngine
-from prompt import build_reflection_prompt, coerce_reflection_result, enforce_schema_compliance
+from prompt import build_reflection_prompt, coerce_reflection_result
 from utils.data_def import DataPoint
 from utils.logger import logger
 
@@ -19,20 +19,15 @@ class ReflectionAgent(BaseAgent):
         )
         
         logger.info("Invoking LLM for reflection...")
-        result = self.invoke_llm(prompt)
+        result = self.invoke_llm(prompt, agent_name="reflection_agent")
         
-        logger.debug("Coercing reflection result and enforcing schema compliance...")
-        review_result = coerce_reflection_result(result, data.extraction_result)
-        review_result["revised_json"] = enforce_schema_compliance(review_result["revised_json"], data.schema)
+        logger.debug("Coercing reflection result...")
+        review_result = coerce_reflection_result(result)
 
         final_result = {
             "chunks": data.chunk_results,
-            "document": review_result["revised_json"],
-            "review": {
-                "score": review_result["score"],
-                "problems": review_result["problems"],
-                "suggestions": review_result["suggestions"],
-            },
+            "document": data.extraction_result,
+            "review": review_result,
         }
 
         data.set_review_result(review_result)

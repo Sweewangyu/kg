@@ -14,3 +14,11 @@ result, trajectory = pipeline.get_extract_result(
     text=text,
     show_trajectory=True,
 )
+
+generated_result, generation_trajectory = pipeline.get_generation_result(
+    triplets=[
+        {"subject": "The Legend of the Golden Gun", "relation": "publication date", "object": "1979"},
+        {"subject": "The Sacketts", "relation": "publication date", "object": "1979"},
+    ],
+    show_trajectory=True,
+)

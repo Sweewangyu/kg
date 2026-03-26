@@ -1,11 +1,22 @@
+task:
+  type: extraction
+  use_reflection: true
+
 model:
-  model_name_or_path: gpt-4o-mini
-  api_key: your_api_key
-  base_url: https://api.openai.com/v1
+  model_name_or_path: Qwen/Qwen3.5-9B
+  api_key: sk-iyyndybfqyuzdrvpojzvfehfpnbqdktdhdccubvgabifeyqk
+  base_url: https://api.siliconflow.cn/v1
 
 extraction:
-  text: Alice is an engineer. Alice is Bob's spouse.
-  use_file: false
-  file_path: ""
+  use_file: true
+  file_path: "/Users/mac/Desktop/kg/kg/data/input_files/15-大模型 RAG 经验面.pdf"
   language: auto
   show_trajectory: true
+
+generation:
+  triplets_json_path: "/Users/mac/Desktop/kg/kg/data/input_files/reverse_generation_triplets.json"
+  show_trajectory: true
+
+agent:
+  chunk_char_limit: 1024
+  chunk_overlap_sentences: 2

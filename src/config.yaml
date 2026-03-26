@@ -1,5 +1,0 @@
-agent:
-  language: auto
-  chunk_char_limit: 15
-  chunk_overlap_sentences: 2
-  chunk_token_limit: 1024

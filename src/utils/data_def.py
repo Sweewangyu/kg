@@ -9,6 +9,8 @@ class ExtractionRequest:
     use_file: bool = False
     file_path: str = ""
     show_trajectory: bool = False
+    use_reflection: bool = True
+    triplets: Any = field(default_factory=list)
 
 
 @dataclass
@@ -17,6 +19,8 @@ class DataPoint:
     source_text: str = ""
     chunks: list[dict[str, str]] = field(default_factory=list)
     chunk_results: list[dict[str, Any]] = field(default_factory=list)
+    generation_triplets: list[dict[str, str]] = field(default_factory=list)
+    generated_text: str = ""
     schema: dict[str, list[str]] = field(default_factory=dict)
     extraction_result: dict[str, Any] = field(default_factory=dict)
     review_result: dict[str, Any] = field(default_factory=dict)
@@ -35,6 +39,10 @@ class DataPoint:
     def file_path(self) -> str:
         return self.request.file_path
 
+    @property
+    def triplets(self) -> Any:
+        return self.request.triplets
+
     def set_source_text(self, text: str) -> None:
         self.source_text = text
 
@@ -43,6 +51,12 @@ class DataPoint:
 
     def set_chunk_results(self, results: list[dict[str, Any]]) -> None:
         self.chunk_results = [extract_json_dict(result) for result in results]
+
+    def set_generation_triplets(self, triplets: list[dict[str, str]]) -> None:
+        self.generation_triplets = [extract_json_dict(triplet) for triplet in triplets]
+
+    def set_generated_text(self, text: str) -> None:
+        self.generated_text = str(text).strip()
 
     def set_schema(self, schema: dict[str, list[str]]) -> None:
         self.schema = schema
@@ -65,6 +79,8 @@ class DataPoint:
             "source_text": self.source_text,
             "chunks": self.chunks,
             "chunk_results": self.chunk_results,
+            "triplets": self.generation_triplets,
+            "generated_text": self.generated_text,
             "schema": self.schema,
             "trajectory": self.result_trajectory,
             "pred": self.pred,

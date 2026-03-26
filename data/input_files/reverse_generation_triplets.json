@@ -1,0 +1,22 @@
+[
+  {
+    "subject": "张三",
+    "relation": "职业",
+    "object": "数据分析师"
+  },
+  {
+    "subject": "张三",
+    "relation": "就职于",
+    "object": "星河科技"
+  },
+  {
+    "subject": "星河科技",
+    "relation": "所在地",
+    "object": "杭州"
+  },
+  {
+    "subject": "张三",
+    "relation": "毕业于",
+    "object": "浙江大学"
+  }
+]
